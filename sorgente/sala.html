@@ -44,7 +44,7 @@
   .nome .punto{color:var(--ink-c)}
   .gioco.refusi .nome .punto{color:var(--ink-m)}
   .gioco.leporello .nome .punto{color:#F0B429}
-  .gioco.tiratura .nome .punto{color:#C62F16}
+  .gioco.tiratura .nome .punto{color:#E8552F}
   .sotto{font-family:var(--display);font-style:italic;font-size:16px;color:var(--muted);margin:0}
   .descrizione{font-size:13.5px;line-height:1.65;color:var(--muted);margin:4px 0 0}
   .descrizione b{color:var(--paper);font-weight:600}
@@ -57,6 +57,7 @@
          color:var(--accent)}
   .gioco.refusi .entra{color:var(--ink-m)}
   .gioco.leporello .entra{color:#F0B429}
+  .gioco.tiratura .entra{color:#E8552F}
 
   .gioco.prossimo{grid-column:1 / -1;border-style:dashed;background:transparent;justify-content:center;
                   align-items:center;text-align:center;padding:34px 22px;min-height:200px}
@@ -68,11 +69,12 @@
         border-radius:4px;padding:20px 22px}
   .albo h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0 0 4px}
   .albo .intro{font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.6}
-  .colonne{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  .colonne{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:22px}
   .colonna h3{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
               color:var(--accent);margin:0 0 8px}
   .colonna.refusi h3{color:var(--ink-m)}
   .colonna.leporello h3{color:#F0B429}
+  .colonna.tiratura h3{color:#E8552F}
   .albo ol{list-style:none;margin:0;padding:0}
   .albo li{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:baseline;
            padding:7px 0;border-top:1px solid var(--rule-soft)}
@@ -166,12 +168,21 @@
       </div>
     </a>
 
-    <div class="gioco prossimo">
-      <h2 class="nome">In composizione</h2>
-      <p class="descrizione">Il quarto gioco è sul banco: un omino che attraversa di corsa il
-      reparto, saltando bancali di risme e colate d'inchiostro sotto una pioggia di volantini.
-      Si chiamerà <b>Tiratura</b>.</p>
-    </div>
+    <a class="gioco tiratura" href="tiratura/">
+      <canvas class="anteprima" id="antTiratura" width="560" height="300"></canvas>
+      <div class="corpo">
+        <h2 class="nome">Tiratura<span class="punto">.</span></h2>
+        <p class="sotto">la corsa del ragazzo di bottega</p>
+        <p class="descrizione">Il garzone attraversa di corsa tutto lo stabilimento con le bozze
+        sotto il braccio: <b>salta i bancali</b> di risme, scavalca le colate d'inchiostro, passa
+        scivolando sotto la taglierina. Intanto piovono <b>volantini e biglietti da visita</b>,
+        e ogni trecento metri si cambia reparto.</p>
+        <div class="piede">
+          <span class="primato" data-record="tiratura">—</span>
+          <span class="entra">Gioca →</span>
+        </div>
+      </div>
+    </a>
 
   </main>
 
@@ -193,13 +204,18 @@
         <h3>Leporello · il serpente di carta</h3>
         <ol id="alboLeporello"></ol>
       </div>
+      <div class="colonna tiratura">
+        <h3>Tiratura · la corsa</h3>
+        <ol id="alboTiratura"></ol>
+      </div>
     </div>
     <p class="nota" id="alboNota">Carico l'albo…</p>
   </section>
 
   <footer class="colofoot">
     <span>Arti Grafiche Fimognari · Milano · dal 1950</span>
-    <span><a href="baseline/">Baseline</a> · <a href="refusi/">Refusi</a> · <a href="leporello/">Leporello</a></span>
+    <span><a href="baseline/">Baseline</a> · <a href="refusi/">Refusi</a> ·
+    <a href="leporello/">Leporello</a> · <a href="tiratura/">Tiratura</a></span>
   </footer>
 </div>
 
@@ -633,6 +649,173 @@
     };
   }
 
+
+  /* ---------------- anteprima di Tiratura ---------------- */
+  /* Il garzone corre e salta da solo: quando un bancale gli arriva addosso,
+     stacca. Serve movimento, non bravura. */
+  function anteprimaTiratura(cv){
+    const c = cv.getContext("2d");
+    const Wc = cv.width, Hc = cv.height;
+    const S = Wc / 470;
+    const suolo = Hc - 46 * S;
+    const G = 0.0021 * S, VS = 0.735 * S, V = 0.40 * S;
+    const gx = Wc * 0.20;
+    let py = suolo, vy = 0, aTerra = true, corsa = 0, mondo = 0;
+    let ostacoli = [], volanti = [], prossimo = 900, prossimaPioggia = 1800;
+
+    function nuovoOstacolo(){
+      const piani = 1 + Math.floor(Math.random() * 3);
+      ostacoli.push({ x:Wc + 20 * S, w:52 * S, h:[0, 34, 62, 92][piani] * S, piani:piani });
+    }
+    function pioggia(){
+      const n = 5 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < n; i++){
+        const k = i / (n - 1);
+        volanti.push({ x:Wc + 20 * S + i * 34 * S,
+                       y:suolo - (50 + Math.sin(k * Math.PI) * 96) * S,
+                       t:Math.random() < .25 ? "b" : "v",
+                       rot:Math.random() * 6.283, vr:(Math.random() - .5) * .006 });
+      }
+    }
+    function passo(dt){
+      const dx = V * dt;
+      mondo += dx;
+      corsa += dt * (aTerra ? 1 : .6);
+      if (!aTerra || vy < 0){ vy += G * dt; py += vy * dt; }
+      prossimo -= dt;
+      if (prossimo <= 0){ nuovoOstacolo(); prossimo = 1100 + Math.random() * 900; }
+      prossimaPioggia -= dt;
+      if (prossimaPioggia <= 0){ pioggia(); prossimaPioggia = 2600 + Math.random() * 2200; }
+      for (let i = ostacoli.length - 1; i >= 0; i--){
+        const o = ostacoli[i];
+        o.x -= dx;
+        // stacca quando è a tiro
+        if (aTerra && o.x - gx < 120 * S && o.x - gx > 40 * S){ vy = -VS; aTerra = false; }
+        if (o.x + o.w < -30 * S) ostacoli.splice(i, 1);
+      }
+      for (let i = volanti.length - 1; i >= 0; i--){
+        const v = volanti[i];
+        v.x -= dx; v.rot += v.vr * dt;
+        if (v.x < -30 * S) volanti.splice(i, 1);
+      }
+      let appoggio = suolo;
+      for (const o of ostacoli){
+        if (o.x < gx + 14 * S && o.x + o.w > gx - 14 * S){
+          const cima = suolo - o.h;
+          if (py <= cima + 2 * S) appoggio = Math.min(appoggio, cima);
+        }
+      }
+      if (py >= appoggio){ py = appoggio; vy = 0; aTerra = true; }
+      else if (aTerra && py < appoggio - 1) aTerra = false;
+    }
+
+    function disegna(){
+      const g = c.createLinearGradient(0, 0, 0, suolo);
+      g.addColorStop(0, "#1F303F"); g.addColorStop(1, "#0C1520");
+      c.fillStyle = g; c.fillRect(0, 0, Wc, suolo);
+      // gli scaffali sul fondo
+      c.save(); c.globalAlpha = .78;
+      const per = 190 * S, off = mondo * .18, alt = suolo - 20 * S;
+      for (let x = -(off % per) - per; x < Wc + per; x += per){
+        c.fillStyle = "#0A1119";
+        c.fillRect(x, alt - 210 * S, 8 * S, 210 * S);
+        c.fillRect(x + 150 * S, alt - 210 * S, 8 * S, 210 * S);
+        for (let r = 0; r < 5; r++){
+          const y = alt - 34 * S - r * 42 * S;
+          c.fillStyle = "#0A1119";
+          c.fillRect(x, y, 158 * S, 5 * S);
+          c.fillStyle = r % 2 ? "#4A5764" : "#5A6773";
+          for (let k = 0; k < 3; k++) c.fillRect(x + 10 * S + k * 47 * S, y - 26 * S, 40 * S, 26 * S);
+        }
+      }
+      c.restore();
+      // il pavimento con le strisce di sicurezza
+      c.fillStyle = "#C9C4B8"; c.fillRect(0, suolo, Wc, Hc - suolo);
+      c.fillStyle = "#A9A498"; c.fillRect(0, suolo, Wc, 2 * S);
+      const pS = 46 * S, oS = mondo % pS;
+      c.save();
+      c.beginPath(); c.rect(0, suolo + 10 * S, Wc, 11 * S); c.clip();
+      c.fillStyle = "#C9A227";
+      for (let x = -oS - pS; x < Wc + pS; x += pS){
+        c.beginPath();
+        c.moveTo(x, suolo + 21 * S); c.lineTo(x + 16 * S, suolo + 10 * S);
+        c.lineTo(x + 30 * S, suolo + 10 * S); c.lineTo(x + 14 * S, suolo + 21 * S);
+        c.closePath(); c.fill();
+      }
+      c.restore();
+      // i bancali
+      for (const o of ostacoli){
+        c.fillStyle = "#8A6A44";
+        c.fillRect(o.x, suolo - 9 * S, o.w, 9 * S);
+        const risme = o.piani * 3, hr = (o.h - 9 * S) / risme;
+        for (let i = 0; i < risme; i++){
+          const y = suolo - 9 * S - (i + 1) * hr;
+          c.fillStyle = i % 2 ? "#F2EFE8" : "#FBFAF7";
+          c.fillRect(o.x + 2 * S, y, o.w - 4 * S, hr - 1);
+          c.fillStyle = INK[["C","M","Y","K"][i % 4]];
+          c.fillRect(o.x + 2 * S, y + hr * .35, o.w - 4 * S, Math.max(1.2, hr * .16));
+        }
+      }
+      // quello che vola
+      for (const v of volanti){
+        c.save(); c.translate(v.x, v.y); c.rotate(v.rot);
+        if (v.t === "v"){
+          c.fillStyle = "#FBFAF7"; c.fillRect(-7 * S, -10 * S, 14 * S, 20 * S);
+          c.fillStyle = INK[["C","M","Y","K"][Math.floor(Math.abs(v.x / 30)) % 4]];
+          c.fillRect(-5.5 * S, -8 * S, 11 * S, 5 * S);
+        } else {
+          c.fillStyle = "#FBFAF7"; c.fillRect(-13 * S, -8 * S, 26 * S, 16 * S);
+          c.fillStyle = INCHIOSTRO;
+          c.font = "700 " + Math.round(9 * S) + 'px "Bodoni Moda", Georgia, serif';
+          c.textAlign = "center"; c.textBaseline = "middle";
+          c.fillText("f.", 0, 0);
+        }
+        c.restore();
+      }
+      // il garzone
+      c.save(); c.translate(gx, py);
+      c.fillStyle = "rgba(23,25,29,.20)";
+      c.beginPath(); c.ellipse(0, 2 * S, 16 * S, 4 * S, 0, 0, 6.283); c.fill();
+      const gamba = Math.sin(corsa / 62);
+      c.strokeStyle = "#2B3A4A"; c.lineWidth = 5 * S; c.lineCap = "round";
+      c.beginPath();
+      if (!aTerra){
+        c.moveTo(-2 * S, -20 * S); c.lineTo(-9 * S, -8 * S);
+        c.moveTo(2 * S, -20 * S); c.lineTo(10 * S, -12 * S);
+      } else {
+        c.moveTo(-1 * S, -20 * S); c.lineTo(-1 * S + gamba * 10 * S, -1 * S);
+        c.moveTo(1 * S, -20 * S); c.lineTo(1 * S - gamba * 10 * S, -1 * S);
+      }
+      c.stroke();
+      c.fillStyle = "#2B3A4A";
+      c.fillRect(-9 * S, -42 * S, 18 * S, 24 * S);
+      c.fillStyle = "#FBFAF7";
+      c.beginPath();
+      c.moveTo(-8 * S, -38 * S); c.lineTo(8 * S, -38 * S);
+      c.lineTo(6 * S, -18 * S); c.lineTo(-6 * S, -18 * S); c.closePath(); c.fill();
+      c.strokeStyle = "#2B3A4A"; c.lineWidth = 4 * S;
+      c.beginPath();
+      c.moveTo(-7 * S, -38 * S); c.lineTo(-7 * S - (!aTerra ? 8 : gamba * -9) * S, -26 * S);
+      c.moveTo(7 * S, -38 * S); c.lineTo(12 * S, -28 * S);
+      c.stroke();
+      c.save();
+      c.translate(14 * S, -28 * S); c.rotate(.16);
+      for (let i = 0; i < 3; i++){
+        c.fillStyle = i % 2 ? "#F0EDE6" : "#FBFAF7";
+        c.fillRect(-6 * S, -3 * S + i * 2.6 * S, 13 * S, 2.4 * S);
+      }
+      c.restore();
+      c.fillStyle = "#E8C39E";
+      c.beginPath(); c.arc(0, -49 * S, 7.5 * S, 0, 6.283); c.fill();
+      c.fillStyle = "#C62F16";
+      c.beginPath(); c.arc(0, -50 * S, 8 * S, Math.PI, 0); c.fill();
+      c.fillRect(-2 * S, -51 * S, 12 * S, 2.5 * S);
+      c.restore();
+    }
+
+    return { passo: passo, disegna: disegna };
+  }
+
   /* ---------------- il giro comune ---------------- */
   const scene = [];
   function avvia(id, fabbrica){
@@ -650,6 +833,7 @@
   avvia("antBaseline", anteprimaBaseline);
   avvia("antRefusi", anteprimaRefusi);
   avvia("antLeporello", anteprimaLeporello);
+  avvia("antTiratura", anteprimaTiratura);
 
   let ultimo = performance.now();
   function giro(ora){
@@ -662,8 +846,9 @@
   if (scene.length) requestAnimationFrame(giro);
 
   /* ---------------- l'albo dei record ---------------- */
-  const NOMI = { baseline: "Baseline", refusi: "Refusi", leporello: "Leporello" };
-  const GIOCHI = ["baseline", "refusi", "leporello"];
+  const NOMI = { baseline: "Baseline", refusi: "Refusi",
+                 leporello: "Leporello", tiratura: "Tiratura" };
+  const GIOCHI = ["baseline", "refusi", "leporello", "tiratura"];
 
   function riga(r, i){
     const li = document.createElement("li");
@@ -685,7 +870,7 @@
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const righe = await res.json();
-      const per = { baseline: [], refusi: [], leporello: [] };
+      const per = { baseline: [], refusi: [], leporello: [], tiratura: [] };
       for (const r of righe) if (per[r.gioco]) per[r.gioco].push(r);
       const nomi = new Set();
       let doppi = 0;
