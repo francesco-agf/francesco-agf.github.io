@@ -55,6 +55,8 @@
         letter-spacing:-.02em}
   .nome .punto{color:var(--ink-c)}
   .gioco.refusi .nome .punto{color:var(--ink-m)}
+  .gioco.leporello .nome .punto{color:#F0B429}
+  .gioco.tiratura .nome .punto{color:#C62F16}
   .sotto{font-family:var(--display);font-style:italic;font-size:16px;color:var(--muted);margin:0}
   .descrizione{font-size:13.5px;line-height:1.65;color:var(--muted);margin:4px 0 0}
   .descrizione b{color:var(--paper);font-weight:600}
@@ -66,6 +68,7 @@
   .entra{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
          color:var(--accent)}
   .gioco.refusi .entra{color:var(--ink-m)}
+  .gioco.leporello .entra{color:#F0B429}
 
   .gioco.prossimo{grid-column:1 / -1;border-style:dashed;background:transparent;justify-content:center;
                   align-items:center;text-align:center;padding:34px 22px;min-height:200px}
@@ -77,10 +80,11 @@
         border-radius:4px;padding:20px 22px}
   .albo h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0 0 4px}
   .albo .intro{font-size:13px;color:var(--muted);margin:0 0 16px;line-height:1.6}
-  .colonne{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+  .colonne{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
   .colonna h3{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
               color:var(--accent);margin:0 0 8px}
   .colonna.refusi h3{color:var(--ink-m)}
+  .colonna.leporello h3{color:#F0B429}
   .albo ol{list-style:none;margin:0;padding:0}
   .albo li{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:baseline;
            padding:7px 0;border-top:1px solid var(--rule-soft)}
@@ -146,11 +150,11 @@
       <canvas class="anteprima" id="antRefusi" width="560" height="300"></canvas>
       <div class="corpo">
         <h2 class="nome">Refusi<span class="punto">.</span></h2>
-        <p class="sotto">la correzione di bozze</p>
-        <p class="descrizione">Una piccola macchina da stampa spara biglietti da visita alle
-        lettere che cadono. Ma <b>si spara solo agli intrusi</b>: le lettere del carattere in
-        macchina vanno lasciate passare. Si comincia con un Comic Sans in mezzo a un bastone
-        e si finisce con <b>due Garamond diversi</b>.</p>
+        <p class="sotto">lo sparatutto tipografico</p>
+        <p class="descrizione">Si è rovesciata la cassa e le lettere piovono sul foglio, ognuna
+        nel suo carattere. Una piccola macchina da stampa spara <b>biglietti da visita</b> e le
+        abbatte tutte; intanto, in cima, c'è una <b>parola del mestiere</b> da comporre nell'ordine
+        giusto, e chi la finisce si guadagna trenta secondi di grazia.</p>
         <div class="piede">
           <span class="primato" data-record="refusi">—</span>
           <span class="entra">Gioca →</span>
@@ -158,10 +162,27 @@
       </div>
     </a>
 
+    <a class="gioco leporello" href="leporello/">
+      <canvas class="anteprima" id="antLeporello" width="560" height="300"></canvas>
+      <div class="corpo">
+        <h2 class="nome">Leporello<span class="punto">.</span></h2>
+        <p class="sotto">il serpente di carta</p>
+        <p class="descrizione">Non è un serpente, è <b>un foglio che si piega</b>. Mangi gli
+        sfridi e ogni boccone aggiunge una facciata; ogni curva è una piega vera, con la sua
+        ombra. Ogni otto facciate chiudi una <b>segnatura</b> e si sale di formato — e più
+        cresci, più diventa difficile non toccarti.</p>
+        <div class="piede">
+          <span class="primato" data-record="leporello">—</span>
+          <span class="entra">Gioca →</span>
+        </div>
+      </div>
+    </a>
+
     <div class="gioco prossimo">
       <h2 class="nome">In composizione</h2>
-      <p class="descrizione">Il terzo gioco è sul banco. Se hai un'idea di cosa dovrebbe
-      esserci in una sala giochi tipografica, si accettano proposte in reparto.</p>
+      <p class="descrizione">Il quarto gioco è sul banco: un omino che attraversa di corsa il
+      reparto, saltando bancali di risme e colate d'inchiostro sotto una pioggia di volantini.
+      Si chiamerà <b>Tiratura</b>.</p>
     </div>
 
   </main>
@@ -177,8 +198,12 @@
         <ol id="alboBaseline"></ol>
       </div>
       <div class="colonna refusi">
-        <h3>Refusi · la correzione di bozze</h3>
+        <h3>Refusi · lo sparatutto</h3>
         <ol id="alboRefusi"></ol>
+      </div>
+      <div class="colonna leporello">
+        <h3>Leporello · il serpente di carta</h3>
+        <ol id="alboLeporello"></ol>
       </div>
     </div>
     <p class="nota" id="alboNota">Carico l'albo…</p>
@@ -186,7 +211,7 @@
 
   <footer class="colofoot">
     <span>Arti Grafiche Fimognari · Milano · dal 1950</span>
-    <span><a href="baseline/">Baseline</a> · <a href="refusi/">Refusi</a></span>
+    <span><a href="baseline/">Baseline</a> · <a href="refusi/">Refusi</a> · <a href="leporello/">Leporello</a></span>
   </footer>
 </div>
 
@@ -409,6 +434,217 @@
     return { passo: passo, disegna: disegna };
   }
 
+
+  /* ---------------- anteprima di Leporello ---------------- */
+  /* Una striscia di carta che si piega e mangia da sola. Segue lo sfrido con
+     una regola sciocca — vai verso il boccone, se la strada è libera — e
+     quando si incastra ricomincia: alla scheda serve movimento, non bravura. */
+  function anteprimaLeporello(cv){
+    const c = cv.getContext("2d");
+    const CO = 11, RO = 6;
+    const L = Math.min(cv.width / CO, cv.height / RO);
+    const ox = (cv.width - L * CO) / 2, oy = (cv.height - L * RO) / 2;
+    const PIANO = "#DBD7CC", RECTO = "#FDFCFA", VERSO = "#EFECE3";
+    const TINTE = ["#00A0DF", "#E20C7A", "#F5C400", "#17191D"];
+    let corpo, dir, sfr, camp, foliaz, acc = 0, alfa = 0, codaFerma = false;
+    const PASSO = 200;
+
+    function occupata(x, y, fino){
+      const n = fino === undefined ? corpo.length : fino;
+      for (let i = 0; i < n; i++) if (corpo[i].x === x && corpo[i].y === y) return true;
+      return false;
+    }
+    function nuovoSfrido(){
+      const l = [];
+      for (let y = 0; y < RO; y++) for (let x = 0; x < CO; x++)
+        if (!occupata(x, y) && !(camp && camp.x === x && camp.y === y)) l.push({ x:x, y:y });
+      sfr = l.length ? l[Math.floor(Math.random() * l.length)] : null;
+    }
+    function nuovoCampione(){
+      const l = [];
+      for (let y = 0; y < RO; y++) for (let x = 0; x < CO; x++)
+        if (!occupata(x, y) && !(sfr && sfr.x === x && sfr.y === y)) l.push({ x:x, y:y });
+      if (!l.length) return;
+      const p = l[Math.floor(Math.random() * l.length)];
+      camp = { x:p.x, y:p.y, colore:TINTE[Math.floor(Math.random() * TINTE.length)], vita:22 };
+    }
+    function reset(){
+      corpo = [];
+      const y0 = Math.floor(RO / 2);
+      for (let i = 0; i < 5; i++) corpo.push({ x:5 - i, y:y0, n:5 - i });
+      foliaz = 5; dir = { x:1, y:0 }; camp = null; codaFerma = false;
+      nuovoSfrido();
+    }
+    reset();
+
+    function sicura(d){
+      const nx = corpo[0].x + d.x, ny = corpo[0].y + d.y;
+      if (nx < 0 || nx >= CO || ny < 0 || ny >= RO) return false;
+      return !occupata(nx, ny, corpo.length - 1);
+    }
+    function scegli(){
+      const cand = [];
+      if (sfr){
+        const dx = sfr.x - corpo[0].x, dy = sfr.y - corpo[0].y;
+        const oriz = { x:Math.sign(dx), y:0 }, vert = { x:0, y:Math.sign(dy) };
+        if (Math.abs(dx) >= Math.abs(dy)){ if (dx) cand.push(oriz); if (dy) cand.push(vert); }
+        else { if (dy) cand.push(vert); if (dx) cand.push(oriz); }
+      }
+      cand.push({ x:dir.x, y:dir.y }, { x:0, y:-1 }, { x:1, y:0 }, { x:0, y:1 }, { x:-1, y:0 });
+      for (const d of cand){
+        if (d.x === -dir.x && d.y === -dir.y) continue;
+        if (d.x === 0 && d.y === 0) continue;
+        if (sicura(d)){ dir = d; return; }
+      }
+    }
+    function passo(){
+      scegli();
+      if (!sicura(dir)) return reset();
+      const nx = corpo[0].x + dir.x, ny = corpo[0].y + dir.y;
+      const mangia = !!(sfr && sfr.x === nx && sfr.y === ny);
+      const prende = !!(camp && camp.x === nx && camp.y === ny);
+      corpo.unshift({ x:nx, y:ny, n:++foliaz });
+      if (mangia){ codaFerma = true; } else { codaFerma = false; corpo.pop(); }
+      if (mangia){
+        nuovoSfrido();
+        if (!camp && Math.random() < .30) nuovoCampione();
+      }
+      if (prende) camp = null;
+      if (camp && --camp.vita <= 0) camp = null;
+      if (corpo.length > 13) reset();
+    }
+
+    function riq(x, y, w, h, r){
+      const rr = Math.min(r, w / 2, h / 2);
+      c.beginPath();
+      c.moveTo(x + rr, y);
+      c.lineTo(x + w - rr, y); c.quadraticCurveTo(x + w, y, x + w, y + rr);
+      c.lineTo(x + w, y + h - rr); c.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+      c.lineTo(x + rr, y + h); c.quadraticCurveTo(x, y + h, x, y + h - rr);
+      c.lineTo(x, y + rr); c.quadraticCurveTo(x, y, x + rr, y);
+      c.closePath();
+    }
+    const vic = function(a, b){ return Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1; };
+
+    function disegna(){
+      c.fillStyle = PIANO; c.fillRect(0, 0, cv.width, cv.height);
+      c.save(); c.translate(ox, oy);
+      c.strokeStyle = "rgba(23,25,29,.055)"; c.lineWidth = 1;
+      c.beginPath();
+      for (let x = 1; x < CO; x++){ c.moveTo(x * L + .5, 0); c.lineTo(x * L + .5, RO * L); }
+      for (let y = 1; y < RO; y++){ c.moveTo(0, y * L + .5); c.lineTo(CO * L, y * L + .5); }
+      c.stroke();
+      // i crocini di registro, come nel gioco
+      c.strokeStyle = "rgba(23,25,29,.26)";
+      const m = L * .55, s = L * .26;
+      for (const a of [[m, m], [CO * L - m, m], [m, RO * L - m], [CO * L - m, RO * L - m]]){
+        c.beginPath();
+        c.moveTo(a[0] - s, a[1]); c.lineTo(a[0] + s, a[1]);
+        c.moveTo(a[0], a[1] - s); c.lineTo(a[0], a[1] + s);
+        c.stroke();
+        c.beginPath(); c.arc(a[0], a[1], s * .58, 0, 6.283); c.stroke();
+      }
+      // lo sfrido
+      if (sfr){
+        c.save();
+        c.translate((sfr.x + .5) * L, (sfr.y + .5) * L);
+        c.beginPath();
+        const rr = [.9, .7, 1, .78, .95, .72, .88];
+        for (let i = 0; i < rr.length; i++){
+          const a = i / rr.length * 6.283, r = L * .32 * rr[i];
+          if (i === 0) c.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+          else c.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        c.closePath();
+        c.fillStyle = "#FFFFFF"; c.fill();
+        c.strokeStyle = "rgba(23,25,29,.18)"; c.lineWidth = 1; c.stroke();
+        c.restore();
+      }
+      // il campione colore
+      if (camp){
+        const x = camp.x * L, y = camp.y * L, p = L * .11;
+        c.fillStyle = "#FFFFFF"; riq(x + p, y + p, L - p * 2, L - p * 2, 1.5); c.fill();
+        c.fillStyle = camp.colore;
+        c.fillRect(x + p + 1, y + p + 1, L - p * 2 - 2, (L - p * 2) * .66);
+        c.strokeStyle = "rgba(23,25,29,.22)"; c.lineWidth = 1;
+        riq(x + p, y + p, L - p * 2, L - p * 2, 1.5); c.stroke();
+      }
+      // la striscia
+      const g = L * .04, n = corpo.length;
+      for (let i = n - 1; i >= 0; i--){
+        const seg = corpo[i];
+        let x = seg.x * L, y = seg.y * L, w = L, h = L;
+        if (i === 0 && n > 1){
+          if (dir.x === 1) w = L * alfa;
+          else if (dir.x === -1){ x += L * (1 - alfa); w = L * alfa; }
+          else if (dir.y === 1) h = L * alfa;
+          else if (dir.y === -1){ y += L * (1 - alfa); h = L * alfa; }
+        } else if (i === n - 1 && n > 1 && !codaFerma && vic(seg, corpo[i - 1])){
+          const d = { x:corpo[i - 1].x - seg.x, y:corpo[i - 1].y - seg.y }, a = 1 - alfa;
+          if (d.x === 1){ x = seg.x * L + L * (1 - a); w = L * a; }
+          else if (d.x === -1){ w = L * a; }
+          else if (d.y === 1){ y = seg.y * L + L * (1 - a); h = L * a; }
+          else if (d.y === -1){ h = L * a; }
+        }
+        if (w <= .4 || h <= .4) continue;
+        c.fillStyle = "rgba(23,25,29,.13)";
+        riq(x + g + 1, y + g + 1.6, Math.max(0, w - g * 2), Math.max(0, h - g * 2), L * .07); c.fill();
+        c.fillStyle = (seg.n % 2 === 0) ? VERSO : RECTO;
+        riq(x + g, y + g, Math.max(0, w - g * 2), Math.max(0, h - g * 2), L * .07); c.fill();
+        c.strokeStyle = "rgba(23,25,29,.17)"; c.lineWidth = 1; c.stroke();
+        // la piega
+        if (i > 0 && i < n - 1){
+          const pr = corpo[i - 1], ne = corpo[i + 1];
+          if (vic(seg, pr) && vic(seg, ne)){
+            const d1 = { x:pr.x - seg.x, y:pr.y - seg.y }, d2 = { x:ne.x - seg.x, y:ne.y - seg.y };
+            if (!(d1.x === -d2.x && d1.y === -d2.y)){
+              const cx = seg.x * L, cy = seg.y * L;
+              const sx = (d1.x === 1 || d2.x === 1) ? 1 : -1;
+              const sy = (d1.y === 1 || d2.y === 1) ? 1 : -1;
+              const axx = sx === 1 ? cx + L : cx, ayy = sy === 1 ? cy + L : cy;
+              const bxx = sx === 1 ? cx : cx + L, byy = sy === 1 ? cy : cy + L;
+              c.save();
+              c.beginPath(); c.moveTo(axx, ayy); c.lineTo(bxx, ayy); c.lineTo(axx, byy); c.closePath();
+              c.clip();
+              const gr = c.createLinearGradient(axx, ayy, bxx, byy);
+              gr.addColorStop(0, "rgba(23,25,29,.13)");
+              gr.addColorStop(1, "rgba(23,25,29,0)");
+              c.fillStyle = gr; c.fillRect(cx, cy, L, L);
+              c.restore();
+              c.strokeStyle = "rgba(23,25,29,.20)"; c.lineWidth = 1;
+              c.beginPath(); c.moveTo(axx, ayy); c.lineTo(bxx, byy); c.stroke();
+            }
+          }
+        }
+        if (L >= 26 && w > L * .8 && h > L * .8){
+          c.fillStyle = "rgba(23,25,29,.30)";
+          c.font = "400 " + Math.round(L * .26) + 'px "IBM Plex Mono", monospace';
+          c.textAlign = "center"; c.textBaseline = "middle";
+          c.fillText(String(seg.n), x + w / 2, y + h / 2 + .5);
+        }
+      }
+      // la rotella che cordona
+      const t0 = corpo[0];
+      const px = (t0.x + .5) * L - dir.x * L * (1 - alfa) * .5;
+      const py = (t0.y + .5) * L - dir.y * L * (1 - alfa) * .5;
+      c.fillStyle = INCHIOSTRO;
+      c.beginPath(); c.arc(px, py, L * .20, 0, 6.283); c.fill();
+      c.fillStyle = "#8A93A0";
+      c.beginPath(); c.arc(px, py, L * .075, 0, 6.283); c.fill();
+      c.restore();
+    }
+
+    return {
+      passo: function(dt){
+        acc += dt;
+        let n = 0;
+        while (acc >= PASSO && n < 3){ acc -= PASSO; passo(); n++; }
+        alfa = Math.min(1, acc / PASSO);
+      },
+      disegna: disegna
+    };
+  }
+
   /* ---------------- il giro comune ---------------- */
   const scene = [];
   function avvia(id, fabbrica){
@@ -425,6 +661,7 @@
   }
   avvia("antBaseline", anteprimaBaseline);
   avvia("antRefusi", anteprimaRefusi);
+  avvia("antLeporello", anteprimaLeporello);
 
   let ultimo = performance.now();
   function giro(ora){
@@ -437,7 +674,8 @@
   if (scene.length) requestAnimationFrame(giro);
 
   /* ---------------- l'albo dei record ---------------- */
-  const NOMI = { baseline: "Baseline", refusi: "Refusi" };
+  const NOMI = { baseline: "Baseline", refusi: "Refusi", leporello: "Leporello" };
+  const GIOCHI = ["baseline", "refusi", "leporello"];
 
   function riga(r, i){
     const li = document.createElement("li");
@@ -459,7 +697,7 @@
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const righe = await res.json();
-      const per = { baseline: [], refusi: [] };
+      const per = { baseline: [], refusi: [], leporello: [] };
       for (const r of righe) if (per[r.gioco]) per[r.gioco].push(r);
       const nomi = new Set();
       let doppi = 0;
@@ -470,7 +708,7 @@
         visti[k] = (visti[k] || 0) + 1;
       }
       for (const k in visti) if (visti[k] > 1) doppi++;
-      for (const g of ["baseline", "refusi"]){
+      for (const g of GIOCHI){
         const ol = document.getElementById("albo" + NOMI[g]);
         ol.innerHTML = "";
         const lista = per[g].sort(function(a, b){ return b.score - a.score; }).slice(0, 5);
@@ -491,11 +729,11 @@
       }
       nota.textContent = nomi.size
         ? nomi.size + (nomi.size === 1 ? " giocatore in sala" : " giocatori in sala") +
-          (doppi ? " · " + doppi + (doppi === 1 ? " ha provato" : " hanno provato") + " tutti e due i giochi" : "")
+          (doppi ? " · " + doppi + (doppi === 1 ? " ne ha provato" : " ne hanno provato") + " più d'uno" : "")
         : "L'albo è ancora bianco.";
     } catch(e){
       nota.textContent = "Albo non raggiungibile in questo momento. I giochi funzionano lo stesso.";
-      for (const g of ["baseline", "refusi"]){
+      for (const g of GIOCHI){
         const badge = document.querySelector('[data-record="' + g + '"]');
         if (badge) badge.textContent = "";
       }
