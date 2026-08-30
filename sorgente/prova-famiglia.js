@@ -80,7 +80,10 @@ const esito = (nome, ok, extra) => {
     await p.waitForTimeout(900);
     const r = await p.evaluate(async () => {
       const ni = document.getElementById('nameInput'); if (ni) ni.value = 'Francesco';
-      const sb = document.getElementById('startBtn') || document.getElementById('dailyBtn');
+      /* In Baseline si comincia apposta con la **partita libera**: è quella che
+         prima non entrava in classifica. */
+      const sb = document.getElementById('freeBtn') || document.getElementById('startBtn')
+              || document.getElementById('dailyBtn');
       if (sb) sb.click();
       await new Promise(r => setTimeout(r, 700));
       const pb = document.getElementById('pauseBtn'); if (pb) pb.click();
@@ -96,11 +99,11 @@ const esito = (nome, ok, extra) => {
     });
     esito((g + ' · il pulsante c\'è ed è rosso').padEnd(34), r.visibile && r.rosso, r);
     esito((g + ' · la partita si chiude').padEnd(34), r.fase === 'over', { fase: r.fase });
-    /* Il punteggio parte se c'è qualcosa da mandare: Baseline non manda le
-       partite a zero punti, e manda in classifica solo la composizione del
-       giorno — differenza voluta, non un guasto. */
-    const attesoInvio = r.punti > 0 && g !== 'baseline';
-    esito((g + ' · il punteggio parte').padEnd(34), attesoInvio ? (inviati.length === 1 && inviati[0].gioco === g) : true,
+    /* **Tutte** le partite entrano in classifica, in tutti e quattro i giochi:
+       libera o del giorno, a zero punti o no. Baseline mandava solo la
+       composizione del giorno e solo sopra zero — chi giocava libero non si
+       vedeva in classifica e pensava a un guasto. */
+    esito((g + ' · il punteggio parte').padEnd(34), inviati.length === 1 && inviati[0].gioco === g,
           inviati.length ? { gioco: inviati[0].gioco, punti: inviati[0].score } : { inviati: 0, punti: r.punti });
     await p.close();
   }
