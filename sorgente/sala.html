@@ -123,6 +123,30 @@
      non compare quando si clicca col mouse. */
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+  /* il proto della sala e la tessera */
+  .proto{border-top:1px solid var(--rule);margin-top:22px;padding-top:18px}
+  .proto h3{font-family:var(--display);font-weight:700;font-size:19px;margin:0 0 4px}
+  .proto-regola{font-size:12.5px;line-height:1.6;color:var(--muted);margin:0 0 12px;max-width:62ch}
+  .proto-regola b{color:var(--paper);font-weight:600}
+  .proto-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  .proto-lista li{display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;
+                  align-items:baseline;padding:8px 0;border-top:1px solid var(--rule-soft);
+                  font-size:13.5px}
+  .proto-lista li:first-child{border-top:0}
+  .proto-lista .pos{font-family:var(--mono);font-size:11px;color:var(--muted-2)}
+  .proto-lista .chi{color:var(--paper)}
+  .proto-lista .dove{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+                     color:var(--muted-2);text-transform:uppercase}
+  .proto-lista .somma{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+  .tessera-riga{display:flex;align-items:center;justify-content:space-between;gap:16px;
+                flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:18px;padding-top:16px}
+  .tessera-nota{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+                text-transform:uppercase;color:var(--muted-2)}
+  .btn-tessera{background:none;border:1px solid var(--rule);border-radius:2px;color:var(--paper);
+               cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+               text-transform:uppercase;padding:11px 15px}
+  .btn-tessera:hover{border-color:var(--paper)}
+
   /* il ponte verso la tipografia vera */
   .bottega{border-top:1px solid var(--rule);margin:44px auto 0;padding:30px 0 0;
            display:grid;grid-template-columns:1fr 1.35fr;gap:26px 40px;align-items:start}
@@ -305,6 +329,24 @@
       </div>
     </div>
     <p class="nota" id="alboNota">Carico l'albo…</p>
+
+    <!-- Il proto della sala: la classifica combinata di chi ha giocato a tutti
+         e quattro. Si somma la **posizione** in ciascuno, non il punteggio,
+         così i quattro giochi pesano uguale e non vince chi ha trovato il gioco
+         dove si fanno più punti. -->
+    <div class="proto" id="proto" hidden>
+      <h3>Il proto della sala</h3>
+      <p class="proto-regola">Chi ha stampato in tutti e quattro. Conta la somma delle
+      <b>posizioni</b>, non dei punti: i quattro giochi pesano uguale.</p>
+      <ol class="proto-lista" id="protoLista"></ol>
+    </div>
+
+    <!-- La tessera del garzone: quello che ti porti via dalla sala, non dalla
+         partita. -->
+    <div class="tessera-riga" id="tesseraRiga" hidden>
+      <span class="tessera-nota" id="tesseraNota"></span>
+      <button class="btn-tessera" id="tesseraBtn">Scarica la tua tessera</button>
+    </div>
   </section>
 
   <!-- Il ponte verso la tipografia vera. Un pezzo di marketing che non ha il
@@ -429,6 +471,42 @@
     if (punto) punto.style.color = g.colore;
     sez.hidden = false;
   })();
+
+  /* Il monogramma di casa, in filigrana e impresso a secco: gli stessi
+     tracciati che usano i quattro giochi. */
+  const MARK_PATHS = ["M 105 22 C 106 24 107 26 107 28 C 107 29 106 31 106 32 L 105 34 C 104 36 101 38 98 38 C 96 38 95 37 94 37 C 93 37 92 36 92 35 C 91 35 91 34 90 33 C 90 33 90 32 90 32 L 90 31 C 90 29 90 27 92 25 C 93 23 94 21 94 19 C 94 15 92 13 90 12 C 87 11 85 11 82 11 C 76 11 71 13 67 18 C 63 23 61 31 61 41 L 61 52 C 61 54 61 57 60 59 C 60 61 59 62 59 63 C 59 64 58 65 57 66 C 55 67 55 68 54 68 C 54 68 53 68 51 69 C 51 69 51 69 51 69 L 85 69 L 85 70 L 61 70 L 61 151 L 61 145 C 61 146 61 146 61 146 C 61 146 61 147 62 147 C 62 148 62 148 63 149 C 63 149 64 150 65 150 C 66 150 67 151 69 151 C 75 151 78 151 79 151 L 79 152 L 31 152 L 31 151 L 38 151 C 40 151 41 150 42 150 C 43 150 44 149 44 149 C 45 149 45 148 45 148 C 46 147 46 147 46 146 C 46 146 46 146 46 146 L 46 70 L 31 70 L 31 69 C 34 69 36 69 38 68 C 40 67 41 66 42 65 C 43 64 44 63 45 61 C 45 60 46 59 46 58 C 46 57 46 56 46 54 C 46 53 46 52 46 52 L 46 52 L 46 52 C 46 50 47 48 47 46 C 47 43 48 40 49 37 C 49 35 50 32 51 31 C 52 29 53 27 55 26 C 58 21 62 18 67 14 C 72 11 78 10 83 10 C 87 10 91 10 94 12 C 97 13 99 14 101 16 C 103 18 104 20 105 22 ", "M 101 135 C 103 137 104 139 104 142 C 104 145 103 147 101 149 C 100 150 97 151 95 151 C 92 151 90 150 88 149 C 86 147 85 145 85 142 C 85 139 86 137 88 135 C 90 133 92 132 95 132 C 97 132 100 133 101 135 "];
+  const MARK_BOX = [130, 168];
+  let markPath = null;
+  try { if (window.Path2D) markPath = MARK_PATHS.map(function(d){ return new Path2D(d); }); }
+  catch(e){ markPath = null; }
+
+  function filigrana(c, cx, cy, altezza, alfa, colore){
+    if (!markPath) return;
+    c.save();
+    c.globalAlpha = alfa;
+    c.fillStyle = colore;
+    const k = altezza / MARK_BOX[1];
+    c.translate(cx - (MARK_BOX[0] * k) / 2, cy - altezza / 2);
+    c.scale(k, k);
+    for (const p of markPath) c.fill(p);
+    c.restore();
+  }
+
+  /* Il sigillo: una f impressa a secco. Su un foglio bianco un'impressione a
+     secco non è inchiostro, è un rilievo — si vede solo perché ha un'ombra da
+     una parte e una luce dall'altra. Quindi si disegna due volte, sfalsata. */
+  function disegnaSigillo(c, cx, cy, raggio, forza, chiaro){
+    if (!markPath) return;
+    const d = Math.max(1, raggio * 0.045);
+    c.save();
+    c.globalAlpha = forza * (chiaro ? .5 : .34);
+    c.strokeStyle = chiaro ? "rgba(237,234,227,.9)" : "rgba(23,25,29,.55)";
+    c.lineWidth = Math.max(1, raggio * 0.05);
+    c.beginPath(); c.arc(cx, cy, raggio, 0, 6.2832); c.stroke();
+    c.restore();
+    filigrana(c, cx + d, cy + d, raggio * 1.25, forza * (chiaro ? .30 : .20), chiaro ? "#000" : "#0E1116");
+    filigrana(c, cx - d, cy - d, raggio * 1.25, forza * (chiaro ? .55 : .30), chiaro ? "#EDEAE3" : "#FFFFFF");
+  }
 
   /* ---------------- anteprima di Baseline ---------------- */
   /* Una composizione che si costruisce da sola: i mattoncini scendono, si
@@ -1252,6 +1330,285 @@
     p.hidden = false;
   })();
 
+
+  /* ---------- il proto della sala ----------
+     Chi gioca a uno solo dei quattro può vincere quel gioco; il proto è chi li
+     tiene tutti e quattro. Si somma la **posizione** in ciascuno, non il
+     punteggio: se si sommassero i punti vincerebbe chi ha trovato il gioco dove
+     i numeri sono più grandi, che non vuol dire essere più bravi. */
+  let classifiche = null;
+  const NOME_GIOCO = { baseline: "Baseline", refusi: "Refusi",
+                       leporello: "Leporello", tiratura: "Tiratura" };
+  const COLORE_GIOCO = { baseline: "#0aa0df", refusi: "#e20c7a",
+                         leporello: "#f5c40a", tiratura: "#E8552F" };
+
+  function posizioni(per){
+    // per ogni gioco, la posizione di ciascun nome
+    const pos = {};
+    for (const g of GIOCHI){
+      const lista = per[g].slice().sort(function(a, b){ return b.score - a.score; });
+      lista.forEach(function(r, i){
+        const k = (r.nome || "").trim();
+        if (!k) return;
+        if (!pos[k]) pos[k] = {};
+        pos[k][g] = { posto: i + 1, score: r.score };
+      });
+    }
+    return pos;
+  }
+  function proti(per){
+    const pos = posizioni(per);
+    const fuori = [];
+    for (const nome in pos){
+      const p = pos[nome];
+      let quanti = 0, somma = 0;
+      for (const g of GIOCHI) if (p[g]){ quanti++; somma += p[g].posto; }
+      if (quanti === GIOCHI.length) fuori.push({ nome: nome, somma: somma, pos: p });
+    }
+    fuori.sort(function(a, b){ return a.somma - b.somma; });
+    return fuori;
+  }
+  function mostraProto(per){
+    const sez = document.getElementById("proto");
+    const ol = document.getElementById("protoLista");
+    if (!sez || !ol) return;
+    const lista = proti(per);
+    ol.innerHTML = "";
+    if (!lista.length){
+      sez.hidden = false;
+      const li = document.createElement("li");
+      li.innerHTML = '<span class="pos">—</span>' +
+        '<span class="chi vuoto">Nessuno li ha ancora stampati tutti e quattro. ' +
+        'Il primo proto della sala può essere il tuo nome.</span>' +
+        '<span class="dove"></span><span class="somma"></span>';
+      ol.appendChild(li);
+      return;
+    }
+    lista.slice(0, 5).forEach(function(r, i){
+      const li = document.createElement("li");
+      const p = document.createElement("span");
+      p.className = "pos"; p.textContent = (i + 1) + "º";
+      const n = document.createElement("span");
+      n.className = "chi"; n.textContent = r.nome;
+      const d = document.createElement("span");
+      d.className = "dove";
+      d.textContent = GIOCHI.map(function(g){ return r.pos[g].posto + "º"; }).join(" · ");
+      const q = document.createElement("span");
+      q.className = "somma"; q.textContent = r.somma;
+      li.appendChild(p); li.appendChild(n); li.appendChild(d); li.appendChild(q);
+      ol.appendChild(li);
+    });
+    sez.hidden = false;
+  }
+
+
+  /* ---------- la tessera del garzone ----------
+     Quello che ti porti via dalla **sala**, non dalla partita: nome, i quattro
+     record con la posizione, la somma che vale per il proto, e i colori della
+     mazzetta di Baseline — che stanno in questo browser e non nel database,
+     perché la mazzetta è di chi gioca, non della sala.
+
+     È l'unico oggetto che mette insieme i quattro giochi: finché non li hai
+     provati tutti, la tessera resta con delle righe vuote, e si vede. */
+  const CHIAVE_NOME = "agf.giocatore";
+  const CHIAVE_MAZZETTA = "agf.mazzetta";
+  function nomeSalvato(){
+    try { return (localStorage.getItem(CHIAVE_NOME) || localStorage.getItem("baseline.nome") || "").trim(); }
+    catch(e){ return ""; }
+  }
+  function mazzettaSalvata(){
+    try {
+      const g = JSON.parse(localStorage.getItem(CHIAVE_MAZZETTA) || "[]");
+      return Array.isArray(g) ? g.filter(function(c){ return c && c.hex; }) : [];
+    } catch(e){ return []; }
+  }
+
+  const TESSERA_L = 1000, TESSERA_H = 640;
+  function disegnaTessera(c, nome, per){
+    const pos = posizioni(per);
+    const mio = pos[nome] || {};
+    c.canvas.width = TESSERA_L; c.canvas.height = TESSERA_H;
+    c.fillStyle = "#F7F4EC"; c.fillRect(0, 0, TESSERA_L, TESSERA_H);
+    filigrana(c, TESSERA_L * .78, TESSERA_H * .52, TESSERA_H * .74, .04, "#17191D");
+
+    const L = 74, R = TESSERA_L - 74;
+    c.textBaseline = "alphabetic";
+
+    // testata
+    c.fillStyle = "#8A8F94";
+    c.font = '500 11px "IBM Plex Mono", monospace';
+    c.textAlign = "left";
+    c.fillText("ARTI GRAFICHE FIMOGNARI \u00b7 MILANO \u00b7 DAL 1950", L, 62);
+    c.textAlign = "right";
+    c.fillText("TESSERA DEL GARZONE", R, 62);
+    c.strokeStyle = "rgba(23,25,29,.28)"; c.lineWidth = 1.5;
+    c.beginPath(); c.moveTo(L, 78.5); c.lineTo(R, 78.5); c.stroke();
+
+    // il nome
+    c.fillStyle = "#17191D";
+    c.textAlign = "left";
+    let corpo = 66;
+    c.font = '900 ' + corpo + 'px "Bodoni Moda", Didot, Georgia, serif';
+    while (c.measureText(nome).width > R - L - 30 && corpo > 26){
+      corpo -= 3;
+      c.font = '900 ' + corpo + 'px "Bodoni Moda", Didot, Georgia, serif';
+    }
+    c.fillText(nome, L, 146);
+
+    // le quattro righe
+    let y = 214;
+    c.font = '500 11px "IBM Plex Mono", monospace';
+    c.fillStyle = "#8A8F94";
+    c.textAlign = "left";  c.fillText("GIOCO", L, y);
+    c.textAlign = "right"; c.fillText("RECORD", L + 560, y);
+    c.fillText("POSTO", R, y);
+    y += 12;
+    c.strokeStyle = "rgba(23,25,29,.18)"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(L, y + .5); c.lineTo(R, y + .5); c.stroke();
+    y += 36;
+
+    let tutti = 0, somma = 0;
+    for (const g of GIOCHI){
+      const p = mio[g];
+      c.textAlign = "left";
+      c.fillStyle = "#17191D";
+      c.font = '600 22px "Bodoni Moda", Didot, Georgia, serif';
+      c.fillText(NOME_GIOCO[g], L, y);
+      // il punto del colore, come sul logotipo
+      const w = c.measureText(NOME_GIOCO[g]).width;
+      c.fillStyle = COLORE_GIOCO[g];
+      c.beginPath(); c.arc(L + w + 7, y - 3, 4, 0, 6.2832); c.fill();
+
+      c.font = '500 20px "IBM Plex Mono", monospace';
+      c.textAlign = "right";
+      if (p){
+        tutti++; somma += p.posto;
+        c.fillStyle = "#17191D";
+        c.fillText(fmt(p.score), L + 560, y);
+        c.fillText(p.posto + "\u00ba", R, y);
+      } else {
+        c.fillStyle = "#B4B0A6";
+        c.fillText("\u2014", L + 560, y);
+        c.fillText("\u2014", R, y);
+      }
+      c.strokeStyle = "rgba(23,25,29,.10)";
+      c.beginPath(); c.moveTo(L, y + 14.5); c.lineTo(R, y + 14.5); c.stroke();
+      y += 50;
+    }
+
+    // la somma, che è quella che conta per il proto
+    y += 10;
+    c.textAlign = "left";
+    c.fillStyle = "#8A8F94";
+    c.font = '500 11px "IBM Plex Mono", monospace';
+    c.fillText("SOMMA DELLE POSIZIONI", L, y);
+    c.fillStyle = "#17191D";
+    c.font = '600 34px "IBM Plex Mono", monospace';
+    c.fillText(tutti === GIOCHI.length ? String(somma) : "\u2014", L, y + 38);
+
+    c.textAlign = "left";
+    c.fillStyle = "#8A8F94";
+    c.font = '500 11px "IBM Plex Mono", monospace';
+    c.fillText("GIOCHI PROVATI", L + 250, y);
+    c.fillStyle = "#17191D";
+    c.font = '600 34px "IBM Plex Mono", monospace';
+    c.fillText(tutti + " su " + GIOCHI.length, L + 250, y + 38);
+
+    // la mazzetta, se c'è: sta in questo browser, non nel database
+    const maz = mazzettaSalvata();
+    c.textAlign = "left";
+    c.fillStyle = "#8A8F94";
+    c.font = '500 11px "IBM Plex Mono", monospace';
+    c.fillText("MAZZETTA", L + 500, y);
+    if (maz.length){
+      const larghe = 18, alte = 26;
+      const quanti = Math.min(14, maz.length);
+      for (let i = 0; i < quanti; i++){
+        c.fillStyle = maz[maz.length - quanti + i].hex;
+        c.fillRect(L + 500 + i * (larghe + 3), y + 12, larghe, alte);
+      }
+      c.fillStyle = "#8A8F94";
+      c.font = '500 11px "IBM Plex Mono", monospace';
+      c.fillText(maz.length + (maz.length === 1 ? " COLORE" : " COLORI"), L + 500, y + 54);
+    } else {
+      c.fillStyle = "#B4B0A6";
+      c.font = '500 15px "IBM Plex Mono", monospace';
+      c.fillText("nessun colore \u2014 chiudi una quadricromia", L + 500, y + 32);
+    }
+
+    // il sigillo, se ha giocato a tutti e quattro
+    if (tutti === GIOCHI.length) disegnaSigillo(c, R - 62, TESSERA_H - 150, 44, 1, false);
+
+    // colophon
+    c.strokeStyle = "rgba(23,25,29,.18)"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(L, TESSERA_H - 74.5); c.lineTo(R, TESSERA_H - 74.5); c.stroke();
+    c.fillStyle = "#6B6F73";
+    c.font = '500 12px "IBM Plex Mono", monospace';
+    c.textAlign = "left"; c.textBaseline = "top";
+    c.fillText("LA SALA GIOCHI DI ARTI GRAFICHE FIMOGNARI", L, TESSERA_H - 60);
+    c.fillText("FRANCESCO-AGF.GITHUB.IO", L, TESSERA_H - 38);
+  }
+
+  function scaricaBlob(blob, nome){
+    const u = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = u; a.download = nome; a.rel = "noopener";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){
+      try { document.body.removeChild(a); } catch(e){}
+      URL.revokeObjectURL(u);
+    }, 5000);
+  }
+  function preparaTessera(per){
+    const riga = document.getElementById("tesseraRiga");
+    const btn = document.getElementById("tesseraBtn");
+    const nota = document.getElementById("tesseraNota");
+    if (!riga || !btn) return;
+    const nome = nomeSalvato();
+    if (!nome){
+      nota.textContent = "Gioca una partita e firma il punteggio: la tessera si compila da sola.";
+      btn.hidden = true;
+      riga.hidden = false;
+      return;
+    }
+    const pos = posizioni(per)[nome];
+    const quanti = pos ? GIOCHI.filter(function(g){ return pos[g]; }).length : 0;
+    nota.textContent = nome + " \u00b7 " + quanti + " " +
+      (quanti === 1 ? "gioco stampato" : "giochi stampati") + " su " + GIOCHI.length;
+    btn.hidden = false;
+    riga.hidden = false;
+    btn.onclick = function(){
+      const base = btn.textContent;
+      const cv = document.createElement("canvas");
+      disegnaTessera(cv.getContext("2d"), nome, per);
+      cv.toBlob(function(blob){
+        if (!blob){ btn.textContent = "Non riesco"; setTimeout(function(){ btn.textContent = base; }, 2400); return; }
+        const file = "tessera-" + nome.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".jpg";
+        try {
+          if (window.File && navigator.canShare){
+            const f = new File([blob], file, { type: blob.type });
+            if (navigator.canShare({ files: [f] })){
+              navigator.share({ files: [f], title: "La mia tessera", text: INVITO })
+                .then(function(){ btn.textContent = "Fatto"; },
+                      function(){ scaricaBlob(blob, file); btn.textContent = "Scaricata"; })
+                .then(function(){ setTimeout(function(){ btn.textContent = base; }, 2600); });
+              return;
+            }
+          }
+        } catch(e){}
+        scaricaBlob(blob, file);
+        btn.textContent = "Scaricata";
+        setTimeout(function(){ btn.textContent = base; }, 2600);
+      }, "image/jpeg", 0.92);
+    };
+  }
+  window.__tessera = function(nome){
+    const cv = document.createElement("canvas");
+    disegnaTessera(cv.getContext("2d"), nome || nomeSalvato() || "Collaudo", classifiche ||
+      { baseline: [], refusi: [], leporello: [], tiratura: [] });
+    return [cv.width, cv.height];
+  };
+
   async function albo(){
     const nota = document.getElementById("alboNota");
     try {
@@ -1294,6 +1651,9 @@
         ? nomi.size + (nomi.size === 1 ? " giocatore in sala" : " giocatori in sala") +
           (doppi ? " · " + doppi + (doppi === 1 ? " ne ha provato" : " ne hanno provato") + " più d'uno" : "")
         : "L'albo è ancora bianco.";
+      classifiche = per;
+      mostraProto(per);
+      preparaTessera(per);
     } catch(e){
       nota.textContent = "Albo non raggiungibile in questo momento. I giochi funzionano lo stesso.";
       for (const g of GIOCHI){
