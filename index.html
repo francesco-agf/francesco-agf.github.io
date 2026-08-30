@@ -48,7 +48,10 @@
   /* ---------- testata ---------- */
   .testata{border-bottom:1px solid var(--rule);padding-bottom:22px}
   .marchio{display:flex;align-items:center;gap:14px;margin-bottom:26px}
-  .logo-agf{width:190px;height:auto;color:var(--muted-2);display:block}
+  /* Il marchio non e' testo: e' il marchio. Va in bianco pieno sul fondo scuro e in
+     nero sul bianco — non nel grigio dell'interfaccia, che lo faceva sembrare
+     azzurrino. */
+  .logo-agf{width:190px;height:auto;color:#fff;display:block}
   .marchio .dal{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;
                 text-transform:uppercase;color:var(--muted-2)}
   .titolone{font-family:var(--display);font-weight:900;letter-spacing:-.035em;
@@ -324,8 +327,36 @@
   /* Una composizione che si costruisce da sola: i mattoncini scendono, si
      posano, e quando una riga è piena va in stampa e sparisce. */
   const COLS = 12, ROWS = 9;
-  const SIGLE = ["C", "M", "Y", "K", "MY", "CY", "CM"];
-  const COLORI = [INK.C, INK.M, INK.Y, INK.K, "#e8412c", "#0f8f5a", "#6b3fa0"];
+  /* I sette inchiostri, nell'ordine dei sette pezzi: quattro lastre pure e tre
+     sovrastampe. I colori non sono scelti a occhio — sono gli stessi che il
+     gioco calcola col modello sottrattivo, così l'anteprima e la partita hanno
+     lo stesso foglio. */
+  const SIGLE  = ["C", "M", "Y", "K", "MY", "CY", "CM"];
+  const COLORI = [INK.C, INK.M, INK.Y, INK.K, "#dd0910", "#0a8447", "#4c2c86"];
+  /* Le sette parti anatomiche della lettera, come in Baseline: occhiello,
+     traversa, ascendente, asta, discendente, grazia, terminale. L'anteprima
+     faceva scendere quadratini singoli e raccontava un gioco che non esiste. */
+  const FORME = {
+    O: [[1,1],[1,1]],
+    T: [[0,1,0],[1,1,1],[0,0,0]],
+    L: [[0,0,1],[1,1,1],[0,0,0]],
+    I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    J: [[1,0,0],[1,1,1],[0,0,0]],
+    S: [[0,1,1],[1,1,0],[0,0,0]],
+    Z: [[1,1,0],[0,1,1],[0,0,0]]
+  };
+  // l'ordine conta: la posizione nell'elenco è la sigla e il colore del pezzo
+  const ORDINE = ["O", "T", "L", "I", "J", "S", "Z"];
+  function ruotaForma(m){
+    const n = m.length, r = [];
+    for (let y = 0; y < n; y++){ r.push([]); for (let x = 0; x < n; x++) r[y].push(m[n - 1 - x][y]); }
+    return r;
+  }
+  const GIRI = ORDINE.map(function(k){
+    const g = [FORME[k]];
+    for (let i = 1; i < 4; i++) g.push(ruotaForma(g[i - 1]));
+    return g;
+  });
 
   function anteprimaBaseline(cv){
     const c = cv.getContext("2d");
@@ -334,32 +365,141 @@
     const cell = Math.min(cv.width / COLS, cv.height / ROWS);
     const ox = Math.round((cv.width - cell * COLS) / 2);
     const oy = Math.round((cv.height - cell * ROWS) / 2);
-    let griglia = [], pezzo = null, t = 0, pulizia = null;
+    let griglia = [], pezzo = null, pulizia = null, stampate = 0;
+    // conteggi per il collaudo: quanti pezzi, quante celle l'uno, quali inchiostri
+    let pezzi = 0, celleTotali = 0, fogli = 0;
+    const visti = new Array(7).fill(false);
     function vuota(){ griglia = []; for (let y = 0; y < ROWS; y++) griglia.push(new Array(COLS).fill(null)); }
     vuota();
-    /* La scheda non deve mai apparire vuota: la composizione parte già a metà,
+    /* La scheda non deve mai apparire vuota: la composizione parte gia' a meta',
        come una macchina che sta girando da un po'. */
     function semina(){
-      for (let y = ROWS - 3; y < ROWS; y++){
-        for (let x = 0; x < COLS; x++){
-          if (Math.random() < (y === ROWS - 1 ? .82 : .55)) griglia[y][x] = Math.floor(Math.random() * 7);
-        }
+      /* Si semina per **altezze di colonna**, non a caso cella per cella: un
+         buco coperto in fondo non si tappa piu' e la pila cresce fino a
+         soffocare senza mai stampare una riga. Cosi' invece ogni incavo e'
+         raggiungibile dall'alto, e la composizione chiude righe da sola. */
+      let h = 1 + Math.floor(Math.random() * 2);
+      for (let x = 0; x < COLS; x++){
+        h = Math.max(0, Math.min(3, h + Math.floor(Math.random() * 3) - 1));
+        for (let y = ROWS - h; y < ROWS; y++) griglia[y][x] = Math.floor(Math.random() * 7);
       }
     }
     semina();
-    function nuovo(){
-      const i = Math.floor(Math.random() * 7);
-      pezzo = { x: Math.floor(Math.random() * COLS), y: -1, i: i, v: 0.16 + Math.random() * 0.09 };
+
+    function staIn(g, celle, px, py){
+      for (let y = 0; y < celle.length; y++){
+        for (let x = 0; x < celle[y].length; x++){
+          if (!celle[y][x]) continue;
+          const gx = px + x, gy = py + y;
+          if (gx < 0 || gx >= COLS || gy >= ROWS) return false;
+          if (gy >= 0 && g[gy][gx] !== null) return false;
+        }
+      }
+      return true;
+    }
+    /* tutte le pose possibili di un pezzo su un foglio: quattro giri per ogni
+       colonna, ciascuna lasciata cadere fin dove arriva */
+    function pose(g, i){
+      const out = [];
+      for (let r = 0; r < 4; r++){
+        const celle = GIRI[i][r];
+        for (let px = -1; px < COLS; px++){
+          if (!staIn(g, celle, px, -celle.length)) continue;
+          let py = -celle.length;
+          while (staIn(g, celle, px, py + 1)) py++;
+          if (py <= -celle.length) continue;
+          out.push({ celle: celle, px: px, py: py });
+        }
+      }
+      return out;
+    }
+    /* posa il pezzo e manda in stampa le righe piene: si misura il foglio come
+       resta **dopo** la stampa, se no chiudere una riga sembra alzare la pila */
+    function posaSu(g, celle, px, py){
+      const p = g.map(function(r){ return r.slice(); });
+      for (let y = 0; y < celle.length; y++)
+        for (let x = 0; x < celle[y].length; x++)
+          if (celle[y][x] && py + y >= 0) p[py + y][px + x] = 0;
+      let righe = 0;
+      for (let y = ROWS - 1; y >= 0; y--){
+        let piena = true;
+        for (let x = 0; x < COLS; x++) if (p[y][x] === null) piena = false;
+        if (piena){ p.splice(y, 1); p.unshift(new Array(COLS).fill(null)); righe++; y++; }
+      }
+      return [p, righe];
+    }
+    /* I pesi contano piu' la pila bassa e piatta che i buchi: con i buchi
+       pesati troppo la macchina costruiva torri e non stampava mai una riga. */
+    function punteggio(g, righe){
+      let somma = 0, buchi = 0, gobbe = 0, prec = null;
+      for (let x = 0; x < COLS; x++){
+        let cima = -1;
+        for (let y = 0; y < ROWS; y++){
+          if (g[y][x] !== null){ if (cima < 0) cima = y; }
+          else if (cima >= 0) buchi++;
+        }
+        const h = cima < 0 ? 0 : ROWS - cima;
+        somma += h;
+        if (prec !== null) gobbe += Math.abs(h - prec);
+        prec = h;
+      }
+      return -0.70 * somma + 1.40 * righe - 0.90 * buchi - 0.60 * gobbe;
+    }
+    /* Al posto del giocatore c'e' una regola sciocca ma non stupida: guarda il
+       pezzo che scende **e quello dopo** — come chi gioca davvero, che
+       l'anteprima ce l'ha — e sceglie la posa che lascia il foglio piu' basso e
+       piu' piatto. Con una mossa sola la pila arrivava in cima e la scheda si
+       svuotava di colpo ogni pochi secondi. */
+    let prossimo = Math.floor(Math.random() * 7);
+    function nuovo(rifatto){
+      const i = prossimo;
+      prossimo = Math.floor(Math.random() * 7);
+      let meglio = null;
+      for (const m of pose(griglia, i)){
+        const dopo = posaSu(griglia, m.celle, m.px, m.py);
+        let v = -1e9;
+        for (const m2 of pose(dopo[0], prossimo)){
+          const d2 = posaSu(dopo[0], m2.celle, m2.px, m2.py);
+          const w = punteggio(d2[0], dopo[1] + d2[1]);
+          if (w > v) v = w;
+        }
+        if (v === -1e9) v = punteggio(dopo[0], dopo[1]);
+        v += Math.random() * 0.05;
+        if (!meglio || v > meglio.v) meglio = { celle: m.celle, px: m.px, py: m.py, v: v };
+      }
+      if (!meglio){
+        /* Il foglio e' pieno. Non si azzera di colpo — sarebbe uno strappo in
+           mezzo alla scheda: va tutto in stampa insieme, con la stessa
+           dissolvenza delle righe, e poi ne entra uno nuovo in macchina. */
+        if (rifatto) return;
+        const tutte = [];
+        for (let y = 0; y < ROWS; y++) tutte.push(y);
+        pulizia = { righe: tutte, t: 0, foglio: true };
+        pezzo = null; fogli++;
+        return;
+      }
+      pezzo = { i: i, celle: meglio.celle, x: meglio.px, giu: meglio.py,
+                y: -meglio.celle.length, v: 0.15 + Math.random() * 0.08 };
+      pezzi++; visti[i] = true;
+      for (const riga of meglio.celle) for (const v of riga) if (v) celleTotali++;
     }
     nuovo();
     function posa(){
-      let y = Math.floor(pezzo.y);
-      while (y + 1 < ROWS && !griglia[y + 1][pezzo.x]) y++;
-      if (y < 0){ vuota(); semina(); nuovo(); return; }
-      griglia[y][pezzo.x] = pezzo.i;
+      for (let y = 0; y < pezzo.celle.length; y++)
+        for (let x = 0; x < pezzo.celle[y].length; x++)
+          if (pezzo.celle[y][x] && pezzo.giu + y >= 0) griglia[pezzo.giu + y][pezzo.x + x] = pezzo.i;
       const piene = [];
       for (let r = 0; r < ROWS; r++) if (griglia[r].every(function(v){ return v !== null; })) piene.push(r);
-      if (piene.length) pulizia = { righe: piene, t: 0 };
+      if (piene.length){
+        /* Il pezzo dopo si sceglie **quando la stampa e' finita**, non adesso:
+           le righe piene stanno ancora li' e il foglio e' per un attimo diverso
+           da come sara'. Scegliendo troppo presto, la posa veniva calcolata su
+           un foglio che sparisce e il pezzo restava a mezz'aria. */
+        pulizia = { righe: piene, t: 0 };
+        stampate += piene.length;
+        pezzo = null;
+        return;
+      }
       nuovo();
     }
     function passo(dt){
@@ -369,13 +509,15 @@
           for (const r of pulizia.righe.slice().sort(function(a,b){ return a-b; })){
             griglia.splice(r, 1); griglia.unshift(new Array(COLS).fill(null));
           }
+          const foglio = pulizia.foglio;
           pulizia = null;
+          if (foglio){ vuota(); semina(); }
+          nuovo();
         }
         return;
       }
       pezzo.y += pezzo.v * dt / 16;
-      const sotto = Math.floor(pezzo.y) + 1;
-      if (sotto >= ROWS || (sotto >= 0 && griglia[sotto] && griglia[sotto][pezzo.x])) posa();
+      if (pezzo.y >= pezzo.giu){ pezzo.y = pezzo.giu; posa(); }
     }
     function disegna(){
       c.fillStyle = CARTA; c.fillRect(0, 0, cv.width, cv.height);
@@ -398,7 +540,16 @@
           mattone(c, x * cell, y * cell, cell, griglia[y][x], a);
         }
       }
-      if (pezzo && !pulizia) mattone(c, pezzo.x * cell, Math.max(-cell, pezzo.y * cell), cell, pezzo.i, 1);
+      if (pezzo && !pulizia){
+        // il pezzo entra dall'alto: si ritaglia sul foglio, se no sborda sulla scheda
+        c.save();
+        c.beginPath(); c.rect(0, 0, cell * COLS, cell * ROWS); c.clip();
+        for (let y = 0; y < pezzo.celle.length; y++)
+          for (let x = 0; x < pezzo.celle[y].length; x++)
+            if (pezzo.celle[y][x])
+              mattone(c, (pezzo.x + x) * cell, (pezzo.y + y) * cell, cell, pezzo.i, 1);
+        c.restore();
+      }
       c.restore();
     }
     function mattone(c, x, y, s, i, a){
@@ -414,7 +565,17 @@
       c.fillText(sg, x + s / 2, y + s / 2 + s * .03);
       c.globalAlpha = 1;
     }
-    return { passo: passo, disegna: disegna };
+    // serve solo al collaudo
+    return { passo: passo, disegna: disegna,
+             stato: function(){
+               let cima = ROWS;
+               for (let y = 0; y < ROWS; y++)
+                 for (let x = 0; x < COLS; x++)
+                   if (griglia[y][x] !== null && y < cima) cima = y;
+               return { alta: (ROWS - cima) / ROWS, stampate: stampate, fogli: fogli,
+                        forme: pezzi, celle: pezzi ? celleTotali / pezzi : 0,
+                        inchiostri: visti.filter(Boolean).length };
+             } };
   }
 
   /* ---------------- anteprima di Refusi ---------------- */
@@ -914,6 +1075,7 @@
     scene.push(fabbrica(finto));
   }
   avvia("antBaseline", anteprimaBaseline);
+  window.__anteprime = scene;   // il collaudo legge da qui
   avvia("antRefusi", anteprimaRefusi);
   avvia("antLeporello", anteprimaLeporello);
   avvia("antTiratura", anteprimaTiratura);
