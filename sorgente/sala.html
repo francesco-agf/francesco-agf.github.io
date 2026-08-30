@@ -118,6 +118,76 @@
     .colofoot{justify-content:center;text-align:center}
   }
   @media (prefers-reduced-motion:reduce){a.gioco:hover{transform:none}}
+
+  /* Chi naviga da tastiera deve vedere dov'e'. Solo :focus-visible: il contorno
+     non compare quando si clicca col mouse. */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* il ponte verso la tipografia vera */
+  .bottega{border-top:1px solid var(--rule);margin:44px auto 0;padding:30px 0 0;
+           display:grid;grid-template-columns:1fr 1.35fr;gap:26px 40px;align-items:start}
+  .bottega-capo{align-self:start}
+  .bottega-eti{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--muted-2);margin:0 0 8px}
+  .bottega-nome{font-family:var(--display);font-weight:900;font-size:clamp(24px,2.6vw,34px);
+                line-height:.98;letter-spacing:-.02em;margin:0}
+  .bottega-nome .punto{color:var(--accent)}
+  .bottega-testo p{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 12px;max-width:56ch}
+  .bottega-testo b{color:var(--paper);font-weight:600}
+  .bottega-testo em{font-style:italic;color:var(--paper)}
+  .bottega-fatto{font-family:var(--mono)!important;font-size:10px!important;
+                 letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)!important}
+  .bottega-via{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;
+               gap:18px;flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:6px;
+               padding:16px 0 0;text-decoration:none;color:var(--muted);
+               font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+  .bottega-via span{color:var(--paper);font-size:13px;letter-spacing:.1em}
+  .bottega-via:hover span{color:var(--accent)}
+  @media (max-width:760px){
+    .bottega{grid-template-columns:1fr;gap:18px;margin-top:34px}
+    .bottega-testo p{font-size:13.5px}
+  }
+
+  /* la tiratura del giorno */
+  .oggi{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+        border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+        padding:14px 0;margin:0 0 26px}
+  .oggi-eti{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+            text-transform:uppercase;color:var(--muted-2)}
+  .oggi-nome{font-family:var(--display);font-weight:700;font-size:26px;
+             line-height:1;color:var(--paper);text-decoration:none}
+  .oggi-nome i{font-family:var(--display);font-style:italic;font-weight:400;
+               font-size:17px;color:var(--muted)}
+  .oggi-nome:hover{color:var(--paper)}
+  .oggi-nome:hover i{color:var(--paper)}
+  .oggi-nota{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+             text-transform:uppercase;color:var(--muted-2);margin-left:auto}
+  @media (max-width:640px){
+    .oggi{gap:8px;padding:12px 0;margin-bottom:20px}
+    .oggi-nome{font-size:22px}
+    .oggi-nota{margin-left:0;flex-basis:100%}
+  }
+
+  /* ---------- bersagli da dito ----------
+     Su un telefono un bersaglio sotto i 44 px si sbaglia. Non si cambia la
+     tipografia: si dà altezza minima e si allineano al centro, così il testo
+     resta identico e cambia solo quanto è grande la zona che risponde. */
+  @media (pointer: coarse){
+    .btn,.tool,.lnk,.sala-link,.invito,.quando-b,.oggi-nome,#boardOpen,#rulesBtn,#inviteBtn,#soundBtn,
+    #padToggle,#musicSel,.audio-bar select{
+      min-height:44px;
+    }
+    .tool,.lnk,.sala-link,.quando-b,.oggi-nome,#boardOpen,#padToggle{
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    #padToggle{min-width:44px}
+    /* I collegamenti dentro una frase («cambia nome», «una partita libera»)
+       restano alti quanto la riga: sono bersagli in linea nel testo, e dargli
+       44 px gonfierebbe la scheda di ottantotto pixel per due parole. */
+    .firma .lnk,.modo .lnk{min-height:0;display:inline}
+    .colofoot{row-gap:0}
+    .piede-destra a{display:inline-flex;align-items:center;min-height:44px}
+  }
 </style>
 
 <div class="foglio">
@@ -131,6 +201,14 @@
     Si gioca dal telefono, non si installa niente, e il nome che metti vale
     per tutti i giochi della sala.</p>
   </header>
+
+  <!-- La tiratura del giorno: ogni gioco ne ha una, e la sala dice quale tocca
+       oggi. È il motivo per tornare domani. -->
+  <section class="oggi" id="oggi" hidden>
+    <span class="oggi-eti">La tiratura di oggi</span>
+    <a class="oggi-nome" id="oggiLink" href="baseline/"><b id="oggiGioco">Baseline</b><span class="punto" id="oggiPunto">.</span> <i id="oggiCosa"></i></a>
+    <span class="oggi-nota">stessa sequenza per tutti fino a mezzanotte</span>
+  </section>
 
   <main class="giochi">
 
@@ -210,11 +288,11 @@
     nell'altro.</p>
     <div class="colonne">
       <div class="colonna baseline">
-        <h3>Baseline · il Tetris tipografico</h3>
+        <h3>Baseline · il tetris tipografico</h3>
         <ol id="alboBaseline"></ol>
       </div>
       <div class="colonna refusi">
-        <h3>Refusi · lo sparatutto</h3>
+        <h3>Refusi · lo sparatutto tipografico</h3>
         <ol id="alboRefusi"></ol>
       </div>
       <div class="colonna leporello">
@@ -222,11 +300,33 @@
         <ol id="alboLeporello"></ol>
       </div>
       <div class="colonna tiratura">
-        <h3>Tiratura · la corsa</h3>
+        <h3>Tiratura · la corsa del ragazzo di bottega</h3>
         <ol id="alboTiratura"></ol>
       </div>
     </div>
     <p class="nota" id="alboNota">Carico l'albo…</p>
+  </section>
+
+  <!-- Il ponte verso la tipografia vera. Un pezzo di marketing che non ha il
+       passo successivo è un giocattolo: qui si dice chi siamo e dove trovarci. -->
+  <section class="bottega">
+    <div class="bottega-capo">
+      <p class="bottega-eti">Il mestiere dietro i giochi</p>
+      <h2 class="bottega-nome">Arti Grafiche Fimognari<span class="punto">.</span></h2>
+    </div>
+    <div class="bottega-testo">
+      <p>Stampiamo a Milano <b>dal 1950</b>. Questi quattro giochi non sono un passatempo
+      preso a prestito: sono il mestiere, messo in regole. Il registro che scappa, la piega
+      che va storta, il refuso che passa in stampa, la carta che finisce a metà tiratura —
+      chi lavora in tipografia le conosce tutte, e sono già dei giochi: una regola precisa,
+      e una penalità quando la sbagli.</p>
+      <p>Li abbiamo scritti noi, uno per volta, per far vedere <em>come si stampa davvero</em>
+      a chi la stampa la vede solo finita.</p>
+      <p class="bottega-fatto" id="bottegaFatto" hidden></p>
+    </div>
+    <a class="bottega-via" href="https://www.agfmilano.com" rel="noopener">
+      Se c'è da stampare qualcosa sul serio <span>agfmilano.com &rarr;</span>
+    </a>
   </section>
 
   <footer class="colofoot">
@@ -296,6 +396,39 @@
     } catch(e){}
     copiaAMano(t, function(){ fine("Link copiato"); });
   });
+
+
+  /* ---------- la tiratura del giorno ----------
+     Ogni gioco ha la sua partita del giorno, con la sequenza identica per tutti
+     fino a mezzanotte. La sala ne mette uno in evidenza a rotazione: cambia
+     ogni giorno, e cambia con la data, non con l'ordine in cui si e' aperto il
+     sito. */
+  const DEL_GIORNO = [
+    { chiave: "baseline",  nome: "Baseline",  cosa: "la composizione del giorno", via: "baseline/",  colore: "#2FB0E8" },
+    { chiave: "refusi",    nome: "Refusi",    cosa: "la bozza del giorno",        via: "refusi/",    colore: "#EC2288" },
+    { chiave: "leporello", nome: "Leporello", cosa: "la piega del giorno",        via: "leporello/", colore: "#F0B429" },
+    { chiave: "tiratura",  nome: "Tiratura",  cosa: "la commessa del giorno",     via: "tiratura/",  colore: "#E8552F" }
+  ];
+  function giocoDiOggi(){
+    const d = new Date();
+    // giorni dall'epoca, in locale: cosi' cambia a mezzanotte di qui
+    const giorni = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000)
+                 + d.getFullYear() * 365;
+    return DEL_GIORNO[giorni % DEL_GIORNO.length];
+  }
+  (function mostraOggi(){
+    const sez = document.getElementById("oggi");
+    if (!sez) return;
+    const g = giocoDiOggi();
+    document.getElementById("oggiGioco").textContent = g.nome;
+    document.getElementById("oggiCosa").textContent = g.cosa;
+    const a = document.getElementById("oggiLink");
+    a.href = g.via;
+    a.className = "oggi-nome " + g.chiave;
+    const punto = document.getElementById("oggiPunto");
+    if (punto) punto.style.color = g.colore;
+    sez.hidden = false;
+  })();
 
   /* ---------------- anteprima di Baseline ---------------- */
   /* Una composizione che si costruisce da sola: i mattoncini scendono, si
@@ -1080,6 +1213,44 @@
     li.appendChild(p); li.appendChild(n); li.appendChild(q);
     return li;
   }
+
+  /* Quante partite ha stampato la sala. È insieme una prova per chi arriva —
+     qualcuno ci ha già giocato — e l'unica misura che abbiamo di quanto giri.
+     Si chiede il conteggio, non le righe: `Prefer: count=exact` lo mette
+     nell'intestazione Content-Range e non scarica niente. */
+  async function partiteGiocate(){
+    /* Due strade, perché non si può contare su una sola: `select=count` risponde
+       nel corpo, ma gli aggregati si possono disattivare; `Prefer: count=exact`
+       risponde in Content-Range, ma quell'intestazione il browser la nasconde
+       se il server non la espone. Se falliscono tutte e due, la riga non
+       compare e la pagina non se ne accorge. */
+    const testa = { "apikey": DB_KEY, "Authorization": "Bearer " + DB_KEY,
+                    "Prefer": "count=exact" };
+    try {
+      const res = await fetch(DB_URL + "scores?select=count", { headers: testa });
+      if (res.ok){
+        const g = await res.json();
+        const n = Array.isArray(g) && g[0] ? Number(g[0].count) : NaN;
+        if (!isNaN(n) && n >= 0) return n;
+      }
+    } catch(e){}
+    try {
+      const res = await fetch(DB_URL + "scores?select=gioco&limit=1", { headers: testa });
+      if (!res.ok) return null;
+      const cr = res.headers.get("content-range") || "";
+      const n = parseInt(cr.split("/")[1], 10);
+      return isNaN(n) ? null : n;
+    } catch(e){ return null; }
+  }
+  (async function mostraPartite(){
+    const p = document.getElementById("bottegaFatto");
+    if (!p) return;
+    const n = await partiteGiocate();
+    if (!n) return;
+    p.textContent = fmt(n) + (n === 1 ? " partita stampata in questa sala"
+                                      : " partite stampate in questa sala");
+    p.hidden = false;
+  })();
 
   async function albo(){
     const nota = document.getElementById("alboNota");
