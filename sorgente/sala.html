@@ -51,6 +51,14 @@
   .sotto{font-family:var(--display);font-style:italic;font-size:16px;color:var(--muted);margin:0}
   .descrizione{font-size:13.5px;line-height:1.65;color:var(--muted);margin:4px 0 0}
   .descrizione b{color:var(--paper);font-weight:600}
+  /* ---------- difficolta' e durata ----------
+     Due parole per scegliere senza leggere. La durata e' qualitativa e non in
+     minuti: nel database non c'e' la durata delle partite, e mettere «2–5 min»
+     senza averli misurati sarebbe un numero inventato. */
+  .scheda-dati{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .dato{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+        color:var(--muted);border:1px solid var(--rule);border-radius:2px;padding:3px 7px;
+        white-space:nowrap}
   .piede{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
          margin-top:auto;padding-top:14px;border-top:1px solid var(--rule-soft);flex-wrap:wrap}
   .primato{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
@@ -88,6 +96,7 @@
   /* Il nome di un giocatore si tronca con i puntini; la frase che dice
      «non ha ancora giocato nessuno» no: quella va letta per intero. */
   .chi.vuoto{white-space:normal;overflow:visible;color:var(--muted)}
+  .chi.ko{white-space:normal;overflow:visible;color:#E8552F;font-style:italic}
   .quanto{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
   /* La sala è la pagina che si manda quando si vuole far vedere tutto:
      il pulsante per condividerla c'era in tutti e quattro i giochi e non qui. */
@@ -102,6 +111,14 @@
         margin:12px 0 0;line-height:1.7}
 
   /* ---------- piede ---------- */
+  /* ---------- la tacca del telefono ----------
+     Sui telefoni con la tacca il sistema si tiene per se' una striscia in
+     basso e due sottili ai lati: il piede e i tasti di gioco si tengono
+     sopra, o l'ultima riga finisce sotto la barra di casa. */
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .colofoot{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+  .a-voce{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+          clip:rect(0 0 0 0);white-space:nowrap;border:0}
   .colofoot{margin-top:36px;padding-top:18px;border-top:1px solid var(--rule);
     display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
     font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
@@ -237,15 +254,13 @@
   <main class="giochi">
 
     <a class="gioco baseline" href="baseline/">
-      <canvas class="anteprima" id="antBaseline" width="560" height="300"></canvas>
+      <canvas class="anteprima" id="antBaseline" width="560" height="300" role="img" aria-label="Anteprima di Baseline: i pezzi tipografici scendono e chiudono le righe."></canvas>
       <div class="corpo">
         <h2 class="nome">Baseline<span class="punto">.</span></h2>
-        <p class="sotto">il Tetris tipografico</p>
-        <p class="descrizione">I pezzi non sono tetramini astratti: sono <b>parti anatomiche
-        della lettera</b> — aste, occhielli, traverse, grazie — con dentro la sigla della
-        lastra. Riga piena è riga mandata in stampa; quattro righe insieme sono una
-        <b>quadricromia</b>, e dalle percentuali di inchiostro nasce un campione di colore
-        che non esiste fra i pezzi.</p>
+        <p class="sotto">il puzzle tipografico</p>
+        <p class="descrizione">Incastra <b>aste, occhielli e grazie</b>. Chiudi quattro righe
+        insieme e manda in stampa una <b>quadricromia</b>.</p>
+        <span class="scheda-dati"><span class="dato">Avanzata</span><span class="dato">Durata libera</span></span>
         <div class="piede">
           <span class="primato" data-record="baseline">—</span>
           <span class="entra">Gioca →</span>
@@ -254,15 +269,13 @@
     </a>
 
     <a class="gioco refusi" href="refusi/">
-      <canvas class="anteprima" id="antRefusi" width="560" height="300"></canvas>
+      <canvas class="anteprima" id="antRefusi" width="560" height="300" role="img" aria-label="Anteprima di Refusi: le lettere scendono e la macchina spara."></canvas>
       <div class="corpo">
         <h2 class="nome">Refusi<span class="punto">.</span></h2>
         <p class="sotto">lo sparatutto tipografico</p>
-        <p class="descrizione">Si è rovesciata la cassa e le lettere piovono sul foglio, ognuna
-        nel suo carattere. Una piccola macchina da stampa spara <b>biglietti da visita</b> e le
-        abbatte tutte; intanto, in cima, c'è una <b>parola del mestiere</b> da comporre nell'ordine
-        giusto, e chi la finisce si guadagna trenta secondi di grazia. Ogni tre passate scende
-        <b>il Comic Sans</b>: regge cinque colpi e intanto contagia le altre.</p>
+        <p class="descrizione">Spara alle lettere prima che tocchino la <b>linea di base</b>.
+        Componi la parola giusta e guadagna trenta secondi.</p>
+        <span class="scheda-dati"><span class="dato">Media</span><span class="dato">Partita rapida</span></span>
         <div class="piede">
           <span class="primato" data-record="refusi">—</span>
           <span class="entra">Gioca →</span>
@@ -271,15 +284,13 @@
     </a>
 
     <a class="gioco leporello" href="leporello/">
-      <canvas class="anteprima" id="antLeporello" width="560" height="300"></canvas>
+      <canvas class="anteprima" id="antLeporello" width="560" height="300" role="img" aria-label="Anteprima di Leporello: la striscia di carta si piega e raccoglie gli sfridi."></canvas>
       <div class="corpo">
         <h2 class="nome">Leporello<span class="punto">.</span></h2>
         <p class="sotto">il serpente di carta</p>
-        <p class="descrizione">Non è un serpente, è <b>un foglio che si piega</b>. Mangi gli
-        sfridi e ogni boccone aggiunge una facciata; ogni curva è una piega vera, con la sua
-        ombra. Ogni otto facciate chiudi una <b>segnatura</b> e si sale di formato. Dal quinto la
-        <b>piegatrice impazzisce</b> e comincia a imporre lei le pieghe; a fine partita il
-        pieghevole si stende e te lo porti via stampato.</p>
+        <p class="descrizione">Mangia gli <b>sfridi</b>, aggiungi facciate e piega il foglio
+        senza strapparlo. Ogni sei facciate chiudi una <b>segnatura</b>.</p>
+        <span class="scheda-dati"><span class="dato">Media</span><span class="dato">Partita rapida</span></span>
         <div class="piede">
           <span class="primato" data-record="leporello">—</span>
           <span class="entra">Gioca →</span>
@@ -288,14 +299,13 @@
     </a>
 
     <a class="gioco tiratura" href="tiratura/">
-      <canvas class="anteprima" id="antTiratura" width="560" height="300"></canvas>
+      <canvas class="anteprima" id="antTiratura" width="560" height="300" role="img" aria-label="Anteprima di Tiratura: il garzone corre e salta i bancali."></canvas>
       <div class="corpo">
         <h2 class="nome">Tiratura<span class="punto">.</span></h2>
         <p class="sotto">la corsa del ragazzo di bottega</p>
-        <p class="descrizione">Il garzone attraversa di corsa tutto lo stabilimento con le bozze
-        sotto il braccio: <b>salta i bancali</b> di risme, scavalca le colate d'inchiostro, passa
-        scivolando sotto la taglierina. Ogni corsa è una <b>commessa</b> da evadere, e al quarto
-        reparto entra <b>la rotativa</b>: da lì in poi non corri, scappi.</p>
+        <p class="descrizione">Porta le bozze attraverso lo stabilimento: <b>salta i bancali</b>,
+        scivola sotto la taglierina e semina <b>la rotativa</b>.</p>
+        <span class="scheda-dati"><span class="dato">Facile</span><span class="dato">Partita rapida</span></span>
         <div class="piede">
           <span class="primato" data-record="tiratura">—</span>
           <span class="entra">Gioca →</span>
@@ -307,12 +317,12 @@
 
   <section class="albo">
     <h2>L'albo della sala</h2>
-    <p class="intro">Il record di ciascuno, gioco per gioco: si aggiorna da solo a fine partita.
-    La classifica è una sola per tutta la sala — il nome che metti in un gioco te lo ritrovi
-    nell'altro.</p>
+    <p class="intro"><b>Un unico nickname, quattro classifiche.</b> Il nome che metti in un
+    gioco te lo ritrovi nell'altro. Classifica informale: per ogni nickname resta il miglior
+    risultato.</p>
     <div class="colonne">
       <div class="colonna baseline">
-        <h3>Baseline · il tetris tipografico</h3>
+        <h3>Baseline · il puzzle tipografico</h3>
         <ol id="alboBaseline"></ol>
       </div>
       <div class="colonna refusi">
@@ -374,12 +384,18 @@
   <footer class="colofoot">
     <span>Arti Grafiche Fimognari · Milano · dal 1950</span>
     <span class="piede-destra"><a href="baseline/">Baseline</a> · <a href="refusi/">Refusi</a> ·
-    <a href="leporello/">Leporello</a> · <a href="tiratura/">Tiratura</a>
-    <button class="invito" id="inviteBtn">Invita gli amici</button></span>
+    <a href="leporello/">Leporello</a> · <a href="tiratura/">Tiratura</a> · <a href="privacy.html">Privacy</a>
+    <button class="invito" id="inviteBtn">Sfida un collega</button></span>
   </footer>
 </div>
 
 <script>
+/* Gli attrezzi del collaudo esistono solo quando la pagina e' aperta in locale:
+   da file:// (dove hostname e' la stringa vuota) o da un server di prova.
+   Sulla pagina pubblicata non c'e' niente appeso a window. */
+const IN_LOCALE = location.protocol === "file:" ||
+                  ["localhost", "127.0.0.1", "[::1]", ""].includes(location.hostname);
+
 (function(){
   "use strict";
 
@@ -425,7 +441,7 @@
     };
     if (navigator.share){
       navigator.share({ title: "Sala giochi — Arti Grafiche Fimognari", text: INVITO, url: SHARE_URL })
-        .then(function(){ fine("Invito mandato"); }, function(){});
+        .then(function(){ fine("Sfida mandata"); }, function(){});
       return;
     }
     const t = INVITO + "\n" + SHARE_URL;
@@ -1257,23 +1273,71 @@
     const c = cv.getContext("2d");
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
     const finto = { width: w, height: h, getContext: function(){ return c; } };
-    scene.push(fabbrica(finto));
+    const s = fabbrica(finto);
+    s.tela = cv;
+    cv._scena = s;
+    scene.push(s);
   }
   avvia("antBaseline", anteprimaBaseline);
-  window.__anteprime = scene;   // il collaudo legge da qui
+  if (IN_LOCALE) window.__anteprime = scene;   // il collaudo legge da qui
   avvia("antRefusi", anteprimaRefusi);
   avvia("antLeporello", anteprimaLeporello);
   avvia("antTiratura", anteprimaTiratura);
 
+  /* ---------------- quando le anteprime girano davvero ----------------
+     Quattro tele animate che macinano frame anche mentre stanno fuori dallo
+     schermo, o mentre la scheda e' in secondo piano, sono quattro motori
+     accesi in un garage chiuso: batteria del telefono e ventola del portatile
+     se ne accorgono. Ognuna cammina solo mentre si vede, tutte si fermano
+     quando la scheda sparisce, e alla ripresa l'orologio riparte da adesso —
+     se no il primo frame dopo mezz'ora riceverebbe mezz'ora di movimento in
+     una volta sola. Un solo giro alla volta, mai due. */
   let ultimo = performance.now();
+  let giroVivo = 0;
+  const visibili = new Set();
+
+  function serve(){
+    return !fermo && scene.length && visibili.size && document.visibilityState !== "hidden";
+  }
   function giro(ora){
     const dt = Math.min(ora - ultimo, 60);
     ultimo = ora;
-    for (const s of scene){ if (!fermo) s.passo(dt); s.disegna(); }
-    requestAnimationFrame(giro);
+    for (const s of scene){ if (visibili.has(s)) s.passo(dt); s.disegna(); }
+    if (serve()) giroVivo = requestAnimationFrame(giro);
+    else giroVivo = 0;
   }
+  function accendi(){
+    if (giroVivo || !serve()) return;
+    ultimo = performance.now();     /* niente salti al rientro */
+    giroVivo = requestAnimationFrame(giro);
+  }
+  function spegni(){
+    if (giroVivo) cancelAnimationFrame(giroVivo);
+    giroVivo = 0;
+  }
+
+  if (window.IntersectionObserver){
+    const guarda = new IntersectionObserver(function(voci){
+      for (const v of voci){
+        const s = v.target._scena;
+        if (!s) continue;
+        if (v.isIntersecting) visibili.add(s); else visibili.delete(s);
+      }
+      if (visibili.size) accendi(); else spegni();
+    }, { rootMargin: "80px" });
+    for (const s of scene) if (s.tela) guarda.observe(s.tela);
+  } else {
+    for (const s of scene) visibili.add(s);
+  }
+
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "hidden") spegni(); else accendi();
+  });
+
   for (const s of scene) s.disegna();
-  if (scene.length) requestAnimationFrame(giro);
+  accendi();
+  if (IN_LOCALE) window.__giro = { attivo: function(){ return !!giroVivo; },
+                                   viste: function(){ return visibili.size; } };
 
   /* ---------------- l'albo dei record ---------------- */
   const NOMI = { baseline: "Baseline", refusi: "Refusi",
@@ -1602,17 +1666,106 @@
       }, "image/jpeg", 0.92);
     };
   }
-  window.__tessera = function(nome){
+  if (IN_LOCALE) window.__tessera = function(nome){
     const cv = document.createElement("canvas");
     disegnaTessera(cv.getContext("2d"), nome || nomeSalvato() || "Collaudo", classifiche ||
       { baseline: [], refusi: [], leporello: [], tiratura: [] });
     return [cv.width, cv.height];
   };
 
+  /* ---------- l'albo: quattro classifiche, quattro richieste ----------
+     Prima era una richiesta sola, trecento righe ordinate per punteggio: con
+     scale numeriche cosi' diverse fra i quattro giochi bastava un punteggio
+     alto di Baseline per riempire l'elenco e lasciare gli altri a bocca
+     asciutta. Adesso ogni gioco ha la sua richiesta, il suo limite, e il suo
+     stato: se cade Refusi restano in piedi gli altri tre.
+
+     La vista `sala` restituisce gia' **una riga sola per gioco e nickname**,
+     con il punteggio migliore e il pareggio sciolto sul momento in cui e'
+     stato fatto: il limite si puo' quindi chiedere direttamente al server,
+     senza tirare giu' tutto e sfoltire qui. */
+  const QUANTI = 5;
+
+  async function chiediClassifica(g){
+    const res = await fetch(DB_URL + "sala?select=gioco,nome,score,day" +
+                            "&gioco=eq." + encodeURIComponent(g) +
+                            "&order=score.desc,day.asc&limit=" + QUANTI, {
+      headers: { "apikey": DB_KEY, "Authorization": "Bearer " + DB_KEY }
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  function rigaDiStato(g, testo, classe){
+    const ol = document.getElementById("albo" + NOMI[g]);
+    if (!ol) return;
+    ol.textContent = "";
+    const li = document.createElement("li");
+    const pos = document.createElement("span"); pos.className = "pos"; pos.textContent = "—";
+    const chi = document.createElement("span"); chi.className = "chi " + (classe || "vuoto");
+    chi.textContent = testo;
+    const q = document.createElement("span"); q.className = "quanto";
+    li.append(pos, chi, q);
+    ol.appendChild(li);
+  }
+
+  function scriviColonna(g, lista){
+    const ol = document.getElementById("albo" + NOMI[g]);
+    const badge = document.querySelector('[data-record="' + g + '"]');
+    if (!lista.length){
+      rigaDiStato(g, "Nessuno ancora. Il primo nome qui sopra è il tuo.");
+      if (badge) badge.textContent = "Nessun record: mettici il tuo";
+      return;
+    }
+    ol.textContent = "";
+    lista.forEach(function(r, i){ ol.appendChild(riga(r, i)); });
+    if (badge){
+      /* Il nickname arriva da fuori: non finisce mai dentro innerHTML.
+         Si compone con nodi veri, cosi' un nome con delle parentesi
+         angolari resta un nome e non diventa markup. */
+      badge.textContent = "";
+      const forte = document.createElement("b");
+      forte.textContent = lista[0].nome;
+      badge.append("Record · ", forte, " " + fmt(lista[0].score));
+    }
+  }
+
   async function albo(){
     const nota = document.getElementById("alboNota");
+    for (const g of GIOCHI) rigaDiStato(g, "Carico…");
+    nota.textContent = "Carico l'albo…";
+
+    const esiti = await Promise.allSettled(GIOCHI.map(chiediClassifica));
+    let cadute = 0;
+    esiti.forEach(function(e, i){
+      const g = GIOCHI[i];
+      if (e.status === "fulfilled"){
+        scriviColonna(g, e.value.slice().sort(function(a, b){ return b.score - a.score; }));
+      } else {
+        cadute++;
+        rigaDiStato(g, "Classifica non raggiungibile. Il gioco funziona lo stesso.", "ko");
+        const badge = document.querySelector('[data-record="' + g + '"]');
+        if (badge) badge.textContent = "";
+      }
+    });
+
+    if (cadute === GIOCHI.length){
+      nota.textContent = "Albo non raggiungibile in questo momento. I giochi funzionano lo stesso.";
+      return;
+    }
+    if (cadute) nota.textContent = (cadute === 1 ? "Una classifica non ha risposto"
+                                                 : cadute + " classifiche non hanno risposto") +
+                                   "; le altre sono aggiornate.";
+
+    /* Il proto e la tessera hanno bisogno della posizione di ognuno in tutti
+       e quattro i giochi, non dei primi cinque: e' una richiesta a parte, e
+       se cade non porta giu' niente di quello che si vede sopra. */
+    await riepilogo(nota, cadute);
+  }
+
+  async function riepilogo(nota, cadute){
     try {
-      const res = await fetch(DB_URL + "sala?select=gioco,nome,score,day&order=score.desc&limit=300", {
+      const res = await fetch(DB_URL + "sala?select=gioco,nome,score,day&order=score.desc&limit=1000", {
         headers: { "apikey": DB_KEY, "Authorization": "Bearer " + DB_KEY }
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1620,50 +1773,31 @@
       const per = { baseline: [], refusi: [], leporello: [], tiratura: [] };
       for (const r of righe) if (per[r.gioco]) per[r.gioco].push(r);
       const nomi = new Set();
-      let doppi = 0;
       const visti = {};
+      let doppi = 0;
       for (const r of righe){
-        const k = (r.nome || "").toLowerCase();
+        const k = (r.nome || "").trim().toLowerCase();
+        if (!k) continue;
         nomi.add(k);
         visti[k] = (visti[k] || 0) + 1;
       }
       for (const k in visti) if (visti[k] > 1) doppi++;
-      for (const g of GIOCHI){
-        const ol = document.getElementById("albo" + NOMI[g]);
-        ol.innerHTML = "";
-        const lista = per[g].sort(function(a, b){ return b.score - a.score; }).slice(0, 5);
-        if (!lista.length){
-          const li = document.createElement("li");
-          li.innerHTML = '<span class="pos">—</span><span class="chi vuoto">Nessuno ancora. Il primo nome qui sopra è il tuo.</span><span class="quanto"></span>';
-          ol.appendChild(li);
-        } else {
-          lista.forEach(function(r, i){ ol.appendChild(riga(r, i)); });
-        }
-        // il primato sulla scheda del gioco
-        const badge = document.querySelector('[data-record="' + g + '"]');
-        if (badge){
-          badge.innerHTML = lista.length
-            ? "Record · <b>" + lista[0].nome + "</b> " + fmt(lista[0].score)
-            : "Nessun record: mettici il tuo";
-        }
+      if (!cadute){
+        nota.textContent = nomi.size
+          ? nomi.size + (nomi.size === 1 ? " giocatore ha lasciato il segno" : " giocatori hanno lasciato il segno") +
+            (doppi ? " · " + doppi + (doppi === 1 ? " ha provato" : " hanno provato") + " più di un gioco" : "")
+          : "L'albo è ancora bianco.";
       }
-      nota.textContent = nomi.size
-        ? nomi.size + (nomi.size === 1 ? " giocatore in sala" : " giocatori in sala") +
-          (doppi ? " · " + doppi + (doppi === 1 ? " ne ha provato" : " ne hanno provato") + " più d'uno" : "")
-        : "L'albo è ancora bianco.";
       classifiche = per;
       mostraProto(per);
       preparaTessera(per);
     } catch(e){
-      nota.textContent = "Albo non raggiungibile in questo momento. I giochi funzionano lo stesso.";
-      for (const g of GIOCHI){
-        const badge = document.querySelector('[data-record="' + g + '"]');
-        if (badge) badge.textContent = "";
-      }
+      if (!cadute) nota.textContent = "";
     }
   }
+
   albo();
 
-  window.__sala = { albo: albo, scene: scene };
+  if (IN_LOCALE) window.__sala = { albo: albo, scene: scene };
 })();
 </script>

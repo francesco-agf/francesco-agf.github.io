@@ -6,7 +6,7 @@ https://francesco-agf.github.io/
 
 ## I giochi
 
-- **[Baseline](https://francesco-agf.github.io/baseline/)** — il Tetris tipografico. I pezzi
+- **[Baseline](https://francesco-agf.github.io/baseline/)** — il puzzle tipografico. I pezzi
   sono parti anatomiche della lettera; riga piena è riga mandata in stampa.
   Repo: [francesco-agf/baseline](https://github.com/francesco-agf/baseline)
 - **[Refusi](https://francesco-agf.github.io/refusi/)** — lo sparatutto. Si è rovesciata la

@@ -44,6 +44,17 @@ const ok = (n,c,e)=>{ if(!c) ko++; console.log((c?'  ok  ':'  KO  ')+n+(e!==unde
       return { accesa: !!api.guida() };
     });
     ok((g + ' · alla seconda non c\'e\' piu\'').padEnd(40), !s.accesa, s);
+
+    /* «Rivedi tutorial»: chi la vuole rivedere non deve svuotare i dati del
+       browser. Il tasto dimentica di averla vista e la riaccende. */
+    const u = await p.evaluate(async (gioco) => {
+      document.getElementById('rivediBtn').click();
+      await new Promise(r => setTimeout(r, 200));
+      const api = window.__baseline || window.__refusi || window.__leporello || window.__tiratura;
+      return { chiave: localStorage.getItem('agf.guida.' + gioco), accesa: !!api.guida() };
+    }, g);
+    ok((g + ' · «Rivedi tutorial» la rimette').padEnd(40), u.accesa && u.chiave === null, u);
+
     ok((g + ' · console pulita').padEnd(40), err.length === 0, err.slice(0,2));
     await p.close();
   }

@@ -31,16 +31,33 @@ npx playwright install chromium
 Poi, dalla cartella `sorgente/`:
 
 ```sh
-node prova-pagina.js      # albo dei record e schede dei giochi
+node prova-pagina.js       # albo dei record e schede dei giochi
+node prova-classifiche.js  # quattro classifiche, quattro richieste separate
+node prova-nickname.js     # limiti e ripulitura del nome
+node prova-audio.js        # l'audio parte spento, la scelta vale per tutti
+node prova-accesso.js      # finestre, fuoco, zona parlata, zoom, safe-area
+node prova-vita.js         # anteprime e cicli che si fermano quando nessuno guarda
 ```
+
+Le prove che cominciano per `prova-` in questa cartella aprono **anche gli altri
+quattro giochi**, che devono stare in cartelle sorelle.
 
 Gli screenshot e i file scaricati finiscono in `sorgente/uscita/`, che è ignorata da git.
 
+## `privacy.html`: l'unica pagina scritta a mano
+
+`../privacy.html` non ha un sorgente separato e non passa da `build.py`: è testo,
+non gioco, e la doppia forma non servirebbe a niente. Si modifica direttamente lì.
+Contiene solo comportamenti **verificati nel codice** — le chiavi salvate nel
+browser, i campi inviati alla classifica, i fornitori tecnici: se si cambia uno di
+quelli, va cambiata anche lei.
+
 ## Due trappole, imparate a spese nostre
 
-**Il nome prima di giocare.** La partita non parte senza un nome in classifica: ogni prova
-deve scrivere `localStorage.setItem('agf.giocatore', 'Collaudo')` con `addInitScript`
-prima di caricare la pagina, se no ogni verifica fallisce senza motivo apparente.
+**Il nome.** Dal 30.08 la partita parte anche senza nome — si firma alla fine — ma
+molte prove si aspettano di trovarne uno gia' salvato: scrivono
+`localStorage.setItem('agf.giocatore', 'Collaudo')` con `addInitScript` prima di
+caricare la pagina. Toglierlo fa fallire verifiche che con il nome non c'entrano.
 
 **Aspettare un tempo fisso non basta.** Dopo un colpo o una battuta secca il gioco cambia
 stato solo quando l'animazione ha finito. Le prove aspettano che lo stato cambi davvero,
