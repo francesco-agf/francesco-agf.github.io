@@ -1,0 +1,15 @@
+# Sala giochi — Arti Grafiche Fimognari
+# Le cinque pagine si possono indicizzare tutte.
+# Le cartelle sorgente/ no: sono la stessa pagina in forma di lavoro,
+# senza testata, e indicizzarle vorrebbe dire pubblicare due volte la
+# stessa cosa.
+
+User-agent: *
+Allow: /
+Disallow: /sorgente/
+Disallow: /baseline/sorgente/
+Disallow: /refusi/sorgente/
+Disallow: /leporello/sorgente/
+Disallow: /tiratura/sorgente/
+
+Sitemap: https://francesco-agf.github.io/sitemap.xml

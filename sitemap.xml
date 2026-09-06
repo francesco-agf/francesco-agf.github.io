@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sala giochi — Arti Grafiche Fimognari.
+     Sei indirizzi: la pagina d'ingresso, i quattro giochi, la privacy.
+     Va rifatta la data quando si pubblica una versione nuova. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://francesco-agf.github.io/</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://francesco-agf.github.io/baseline/</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://francesco-agf.github.io/refusi/</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://francesco-agf.github.io/leporello/</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://francesco-agf.github.io/tiratura/</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+  <url>
+    <loc>https://francesco-agf.github.io/privacy.html</loc>
+    <lastmod>2026-09-06</lastmod>
+  </url>
+</urlset>
