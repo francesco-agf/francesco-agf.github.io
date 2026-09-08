@@ -111,6 +111,42 @@ console.log('\n— cinque icone, cinque punti —');
         new Set(valori).size === valori.length && valori.every(Boolean), impronte);
 }
 
+console.log('\n— la tacca, in cima —');
+{
+  /* Il guasto che questa prova esiste per non far tornare, visto su un iPhone
+     con la fotocamera al centro dello schermo:
+
+     con `apple-mobile-web-app-status-bar-style: black-translucent` iOS mette
+     la pagina **sotto** la barra di stato quando l'applicazione è aperta dalla
+     schermata di casa. Il risultato è che l'orologio e la fotocamera coprono la
+     testata — «SALA GIOCHI», il logotipo, il tondo — e non si leggono più.
+
+     Due presidi, e servono tutti e due:
+     1. la barra torna **opaca** (`black`): iOS riserva lo spazio e la pagina
+        comincia sotto. Il fondo di casa è quasi nero, quindi non si vede
+        giunta;
+     2. il `body` tiene comunque conto di `safe-area-inset-top`. Oggi quel
+        valore è zero dappertutto — nel browser, sul computer, e in modalità
+        applicazione con la barra opaca — quindi non sposta niente; ma se
+        qualcuno rimettesse la barra trasparente, la testata resterebbe
+        leggibile invece di finire sotto la fotocamera.
+
+     È un controllo **statico**: nessun browser da collaudo sa fingere gli inset
+     di un telefono, quindi si legge quello che sta scritto nel file. La prova
+     vera resta quella a mano, su un telefono con la tacca. */
+  for (const g in CASE){
+    const testa = leggi(CASE[g].dir, 'index.html');
+    esito(g + ': la barra di stato non è trasparente',
+          !/black-translucent/.test(testa),
+          /content="(black[^"]*)"/.exec(testa) && RegExp.$1);
+    esito(g + ': il corpo tiene conto della tacca in cima',
+          /body\{[^}]*padding-top:\s*env\(safe-area-inset-top\)/.test(testa));
+  }
+  const priv = leggi('sala', 'privacy.html');
+  esito('privacy: tiene conto della tacca in cima',
+        /padding-top:\s*env\(safe-area-inset-top\)/.test(priv));
+}
+
 console.log('\n— robots.txt —');
 {
   if (!c_e('sala', 'robots.txt')) esito('robots.txt esiste', false);
